@@ -3,10 +3,10 @@
 // For GitHub Pages: Token is automatically injected from secrets
 
 window.GITHUB_CONFIG = {
-    username: 'baskhairounm',
+    username: 'mbaskhairoun',
     repository: 'SGSA-Pics',
     token: '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', // Edit this for local development
-    baseUrl: 'https://api.github.com/repos/baskhairounm/SGSA-Pics/contents'
+    baseUrl: 'https://api.github.com/repos/mbaskhairoun/SGSA-Pics/contents'
 };
 
 // Meeting Configuration
