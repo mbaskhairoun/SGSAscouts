@@ -1106,7 +1106,7 @@ function displayAnnouncements(announcementsToShow) {
                 </div>
                 <div class="announcement-content">
                     <h3 class="announcement-title">${announcement.title}</h3>
-                    <p class="announcement-text">${announcement.content}</p>
+                    <p class="announcement-text" style="white-space: pre-wrap;">${announcement.content}</p>
                     ${announcement.images && announcement.images.length > 0 ? `
                         <div class="announcement-images-container" id="announcement-images-${announcement.id}"></div>
                     ` : ''}
@@ -1164,6 +1164,7 @@ function updateAnnouncementPreview(previewId, title, content) {
     const previewContent = preview.querySelector('.preview-content');
 
     previewTitle.textContent = title || 'Your announcement title will appear here';
+    previewContent.style.whiteSpace = 'pre-wrap';
     previewContent.textContent = content || 'Your announcement content will appear here';
 }
 

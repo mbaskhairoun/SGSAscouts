@@ -1,11 +1,10 @@
 // GitHub Configuration
-// For local development: Just edit the token below
-// For GitHub Pages: Token is automatically injected from secrets
+// Token is fetched from Firebase Firestore
 
 window.GITHUB_CONFIG = {
     username: 'mbaskhairoun',
     repository: 'SGSA-Pics',
-    token: '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', // Edit this for local development
+    token: null, // Will be fetched from Firebase
     baseUrl: 'https://api.github.com/repos/mbaskhairoun/SGSA-Pics/contents'
 };
 

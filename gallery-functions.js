@@ -1,15 +1,51 @@
 // Photo Gallery Management Functions
-// GitHub Configuration
-const GITHUB_CONFIG = {
-    username: 'baskhairounm',
-    repository: 'SGSA-Pics',
-    token: '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',
-    baseUrl: 'https://api.github.com/repos/baskhairounm/SGSA-Pics/contents'
-};
+// GitHub Configuration - Dynamic token from Firebase
+async function getGalleryGitHubConfig() {
+    // Use config from config.js if available, otherwise fall back to defaults
+    if (window.config) {
+        const config = { ...window.config };
+
+        // Fetch token from Firebase if not already set
+        if (!config.token && window.githubTokenService) {
+            try {
+                config.token = await window.githubTokenService.getToken();
+            } catch (error) {
+                console.error('Error fetching token from Firebase:', error);
+            }
+        }
+
+        return config;
+    }
+
+    // Fallback configuration (for development or if config.js is missing)
+    return {
+        username: 'mbaskhairoun',
+        repository: 'SGSA-Pics',
+        token: null, // Will be fetched from Firebase
+        baseUrl: 'https://api.github.com/repos/mbaskhairoun/SGSA-Pics/contents'
+    };
+}
 
 // Global variables for photo management
 let adminGalleryPhotos = [];
 let currentAdminFilter = 'all';
+let galleryConfig = null;
+
+// Initialize gallery config on page load
+async function initializeGalleryConfig() {
+    try {
+        galleryConfig = await getGalleryGitHubConfig();
+    } catch (error) {
+        console.error('Failed to initialize gallery config:', error);
+    }
+}
+
+// Call initialization when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGalleryConfig);
+} else {
+    initializeGalleryConfig();
+}
 
 // File to Base64 conversion
 function fileToBase64(file) {
@@ -32,23 +68,25 @@ function generateFilename(originalName, category) {
 // Create directory in GitHub if it doesn't exist
 async function ensureDirectoryExists(directory) {
     try {
+        const config = await getGalleryGitHubConfig();
+
         // Create a .gitkeep file in the directory to ensure it exists
         const gitkeepPath = `${directory}/.gitkeep`;
 
         // Check if directory already has files
-        const checkResponse = await fetch(`${GITHUB_CONFIG.baseUrl}/${directory}`, {
+        const checkResponse = await fetch(`${config.baseUrl}/${directory}`, {
             headers: {
-                'Authorization': `token ${GITHUB_CONFIG.token}`,
+                'Authorization': `token ${config.token}`,
                 'Accept': 'application/vnd.github.v3+json'
             }
         });
 
         // If directory doesn't exist (404), create it
         if (checkResponse.status === 404) {
-            const createResponse = await fetch(`${GITHUB_CONFIG.baseUrl}/${gitkeepPath}`, {
+            const createResponse = await fetch(`${config.baseUrl}/${gitkeepPath}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Authorization': `token ${config.token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/vnd.github.v3+json'
                 },
@@ -71,6 +109,8 @@ async function ensureDirectoryExists(directory) {
 // Upload image to GitHub
 async function uploadToGitHub(imageFile, filename) {
     try {
+        const config = await getGalleryGitHubConfig();
+
         // Extract directory from filename and ensure it exists
         const directory = filename.split('/')[0];
         if (directory && directory !== filename) {
@@ -80,10 +120,10 @@ async function uploadToGitHub(imageFile, filename) {
         const base64Data = await fileToBase64(imageFile);
         const base64Content = base64Data.split(',')[1]; // Remove data:image prefix
 
-        const response = await fetch(`${GITHUB_CONFIG.baseUrl}/${filename}`, {
+        const response = await fetch(`${config.baseUrl}/${filename}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `token ${GITHUB_CONFIG.token}`,
+                'Authorization': `token ${config.token}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.github.v3+json'
             },
@@ -101,7 +141,7 @@ async function uploadToGitHub(imageFile, filename) {
         const result = await response.json();
 
         // Use the GitHub blob URL with ?raw=true for immediate access
-        const workingUrl = `https://github.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/blob/main/${filename}?raw=true`;
+        const workingUrl = `https://github.com/${config.username}/${config.repository}/blob/main/${filename}?raw=true`;
         const downloadUrl = result.content.download_url;
 
         console.log('Upload successful:', {
@@ -121,10 +161,12 @@ async function uploadToGitHub(imageFile, filename) {
 // Delete image from GitHub
 async function deleteFromGitHub(filename) {
     try {
+        const config = await getGalleryGitHubConfig();
+
         // First get the file SHA
-        const getResponse = await fetch(`${GITHUB_CONFIG.baseUrl}/${filename}`, {
+        const getResponse = await fetch(`${config.baseUrl}/${filename}`, {
             headers: {
-                'Authorization': `token ${GITHUB_CONFIG.token}`,
+                'Authorization': `token ${config.token}`,
                 'Accept': 'application/vnd.github.v3+json'
             }
         });
@@ -136,10 +178,10 @@ async function deleteFromGitHub(filename) {
         const fileData = await getResponse.json();
 
         // Now delete the file
-        const deleteResponse = await fetch(`${GITHUB_CONFIG.baseUrl}/${filename}`, {
+        const deleteResponse = await fetch(`${config.baseUrl}/${filename}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `token ${GITHUB_CONFIG.token}`,
+                'Authorization': `token ${config.token}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.github.v3+json'
             },
@@ -587,17 +629,22 @@ function getCategoryName(category) {
 function handleImageError(img, originalUrl) {
     console.error('Image failed to load:', originalUrl);
 
+    if (!galleryConfig) {
+        console.error('Gallery config not initialized');
+        return;
+    }
+
     // Try alternative URLs
     const filename = originalUrl.split('/').slice(-2).join('/'); // Get category/filename
     const alternativeUrls = [
         // Primary working format with ?raw=true
-        `https://github.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/blob/main/${filename}?raw=true`,
+        `https://github.com/${galleryConfig.username}/${galleryConfig.repository}/blob/main/${filename}?raw=true`,
         // Standard raw GitHub URLs
-        `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/main/${filename}`,
-        `https://github.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/raw/main/${filename}`,
+        `https://raw.githubusercontent.com/${galleryConfig.username}/${galleryConfig.repository}/main/${filename}`,
+        `https://github.com/${galleryConfig.username}/${galleryConfig.repository}/raw/main/${filename}`,
         // Try master branch alternatives
-        `https://github.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/blob/master/${filename}?raw=true`,
-        `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repository}/master/${filename}`
+        `https://github.com/${galleryConfig.username}/${galleryConfig.repository}/blob/master/${filename}?raw=true`,
+        `https://raw.githubusercontent.com/${galleryConfig.username}/${galleryConfig.repository}/master/${filename}`
     ];
 
     // Try each alternative URL

@@ -28,14 +28,6 @@ jobs:
     - name: Setup Pages
       uses: actions/configure-pages@v4
 
-    - name: Replace token in config
-      run: |
-        echo "Before replacement:"
-        grep "token:" config.js
-        sed -i "s/token: '[^']*'/token: '${{ secrets.IMAGE_UPLOAD_TOKEN }}'/g" config.js
-        echo "After replacement:"
-        grep "token:" config.js
-
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:

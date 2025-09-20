@@ -873,7 +873,7 @@
                         </div>
                         <div class="announcement-body">
                             <h3 class="announcement-title">${announcement.title}</h3>
-                            <p class="announcement-content">${announcement.content}</p>
+                            <p class="announcement-content" style="white-space: pre-wrap;">${announcement.content}</p>
                             ${announcement.images && announcement.images.length > 0 ? `
                                 <div class="announcement-images-container" id="feed-announcement-images-${announcement.id}"></div>
                             ` : ''}

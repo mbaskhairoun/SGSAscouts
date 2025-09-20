@@ -943,11 +943,11 @@
             <form id="addAnnouncementForm" class="announcement-form">
                 <div class="form-group">
                     <label>Title *</label>
-                    <input type="text" name="title" required maxlength="100" placeholder="Enter announcement title">
+                    <input type="text" name="title" required placeholder="Enter announcement title">
                 </div>
                 <div class="form-group">
                     <label>Content *</label>
-                    <textarea name="content" required rows="5" placeholder="Enter announcement content" maxlength="500"></textarea>
+                    <textarea name="content" required rows="8" placeholder="Enter announcement content...&#10;&#10;You can write multiple lines and paragraphs.&#10;Press Enter for new lines." style="min-height: 120px; resize: vertical;"></textarea>
                 </div>
 
                 <!-- Image Upload Section -->
@@ -1016,11 +1016,11 @@
                 <input type="hidden" name="announcementId">
                 <div class="form-group">
                     <label>Title *</label>
-                    <input type="text" name="title" required maxlength="100" placeholder="Enter announcement title">
+                    <input type="text" name="title" required placeholder="Enter announcement title">
                 </div>
                 <div class="form-group">
                     <label>Content *</label>
-                    <textarea name="content" required rows="5" placeholder="Enter announcement content" maxlength="500"></textarea>
+                    <textarea name="content" required rows="8" placeholder="Enter announcement content...&#10;&#10;You can write multiple lines and paragraphs.&#10;Press Enter for new lines." style="min-height: 120px; resize: vertical;"></textarea>
                 </div>
 
                 <!-- Edit Image Upload Section -->
@@ -2073,6 +2073,7 @@
     <script src="admin-script-realtime.js"></script>
     <script src="gallery-functions.js"></script>
     <script src="config.js"></script>
+    <script src="github-token-service-compat.js"></script>
     <script src="announcement-images.js"></script>
     <script src="admin-calendar.js"></script>
     <script src="admin-troops.js"></script>

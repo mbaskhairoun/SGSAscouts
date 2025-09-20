@@ -6,18 +6,29 @@
 //
 // If the token expires, announcements will still work but images will be shown as local previews only
 //
-function getAnnouncementGitHubConfig() {
+async function getAnnouncementGitHubConfig() {
     // Use config from config.js if available, otherwise fall back to defaults
     if (window.GITHUB_CONFIG) {
-        return window.GITHUB_CONFIG;
+        const config = { ...window.GITHUB_CONFIG };
+
+        // Fetch token from Firebase if not already set
+        if (!config.token && window.githubTokenService) {
+            try {
+                config.token = await window.githubTokenService.getToken();
+            } catch (error) {
+                console.error('Error fetching token from Firebase:', error);
+            }
+        }
+
+        return config;
     }
 
     // Fallback configuration (for development or if config.js is missing)
     return {
-        username: 'baskhairounm',
+        username: 'mbaskhairoun',
         repository: 'SGSA-Pics',
         token: '', // No token - will trigger placeholder mode
-        baseUrl: 'https://api.github.com/repos/baskhairounm/SGSA-Pics/contents'
+        baseUrl: 'https://api.github.com/repos/mbaskhairoun/SGSA-Pics/contents'
     };
 }
 
@@ -186,6 +197,7 @@ function updateAnnouncementPreview() {
     }
 
     if (contentInput && previewContent) {
+        previewContent.style.whiteSpace = 'pre-wrap';
         previewContent.textContent = contentInput.value || 'Your announcement content will appear here';
     }
 
@@ -237,7 +249,7 @@ async function uploadAnnouncementImages(images) {
     console.log('uploadAnnouncementImages called with:', images.length, 'images');
 
     // Check if GitHub token is available and valid
-    const config = getAnnouncementGitHubConfig();
+    const config = await getAnnouncementGitHubConfig();
     if (!config.token || config.token === '' || config.token === 'your-github-token-here') {
         console.warn('GitHub token not configured for image uploads');
 
@@ -385,7 +397,7 @@ async function uploadAnnouncementToGitHub(imageFile, filename) {
         const base64Data = await announcementFileToBase64(imageFile);
         const base64Content = base64Data.split(',')[1]; // Remove data:image prefix
 
-        const config = getAnnouncementGitHubConfig();
+        const config = await getAnnouncementGitHubConfig();
         const response = await fetch(`${config.baseUrl}/${filename}`, {
             method: 'PUT',
             headers: {
@@ -428,7 +440,7 @@ async function ensureAnnouncementDirectoryExists(directory) {
         const gitkeepPath = `${directory}/.gitkeep`;
 
         // Check if directory already has files
-        const config = getAnnouncementGitHubConfig();
+        const config = await getAnnouncementGitHubConfig();
         const checkResponse = await fetch(`${config.baseUrl}/${directory}`, {
             headers: {
                 'Authorization': `token ${config.token}`,
