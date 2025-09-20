@@ -1,0 +1,74 @@
+// CORRECTED Firestore Security Rules for SGSA Scouts Admin System
+// Copy and paste these rules into your Firebase Console > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is authorized admin
+    function isAuthorizedAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email_verified == true &&
+             request.auth.token.email in [
+               'admin@sgsascouts.com',
+               'leader@sgsascouts.com', 
+               'coordinator@sgsascouts.com',
+               'mbaskhairoun@gmail.com'
+             ];
+    }
+    
+    // Scout collection rules
+    match /scouts/{scoutId} {
+      allow read, write: if isAuthorizedAdmin();
+    }
+    
+    // Attendance collection rules  
+    match /attendance/{attendanceId} {
+      allow read, write: if isAuthorizedAdmin();
+    }
+    
+    // Settings collection rules
+    match /settings/{settingId} {
+      allow read, write: if isAuthorizedAdmin();
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// TROUBLESHOOTING STEPS:
+//
+// 1. VERIFY YOUR EMAIL IS VERIFIED:
+//    - Go to Firebase Console > Authentication > Users
+//    - Make sure your email shows "Verified" status
+//    - If not, click "Send verification email"
+//
+// 2. CHECK FIRESTORE LOCATION:
+//    - Go to Firebase Console > Firestore Database
+//    - Check if database exists and is in correct region
+//    - If no database exists, create one
+//
+// 3. TEMPORARY TESTING RULES (USE ONLY FOR TESTING):
+//    - Replace the rules above with this temporarily:
+//    - allow read, write: if request.auth != null;
+//    - This allows any authenticated user (less secure but helps test)
+//
+// 4. IF STILL HAVING ISSUES, USE MINIMAL RULES:
+//    rules_version = '2';
+//    service cloud.firestore {
+//      match /databases/{database}/documents {
+//        match /{document=**} {
+//          allow read, write: if request.auth != null;
+//        }
+//      }
+//    }
+//
+// 5. AFTER TESTING, REVERT TO SECURE RULES ABOVE

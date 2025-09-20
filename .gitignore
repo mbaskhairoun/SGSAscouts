@@ -1,0 +1,14 @@
+# Ignore local config file with sensitive tokens
+config.local.js
+
+# Ignore other sensitive files
+*.env
+.env.*
+
+# Ignore build artifacts
+dist/
+build/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

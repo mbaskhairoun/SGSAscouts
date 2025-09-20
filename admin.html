@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>SGSA Scouts - Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <div class="login-header">
+                <img src="logo.jpeg" alt="SGSA Scouts Logo" class="login-logo">
+                <h2>Admin Login</h2>
+                <p>Access the SGSA Scouts Admin Dashboard</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Admin Email" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                    </button>
+                </div>
+                <button type="submit" class="login-btn">
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            <div id="loginError" class="error-message"></div>
+            <div class="login-actions">
+                <button type="button" class="clear-session-btn" onclick="clearAuthSession()">
+                    <i class="fas fa-refresh"></i>
+                    Clear Session & Retry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="dashboard" style="display: none;">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            <h1 class="mobile-title">SGSA Admin</h1>
+        </div>
+
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="logo.jpeg" alt="SGSA Scouts Logo" class="sidebar-logo">
+                <h3>SGSA Admin</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="menu-item" data-section="scouts">
+                    <i class="fas fa-users"></i>
+                    <span>Scout Roster</span>
+                </li>
+                <li class="menu-item" data-section="troops">
+                    <i class="fas fa-flag"></i>
+                    <span>Troop Management</span>
+                </li>
+                <li class="menu-item" data-section="attendance">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Attendance</span>
+                </li>
+                <li class="menu-item" data-section="announcements">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Announcements</span>
+                </li>
+                <li class="menu-item" data-section="calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendar & Events</span>
+                </li>
+                <li class="menu-item" data-section="gallery">
+                    <i class="fas fa-images"></i>
+                    <span>Photo Gallery</span>
+                </li>
+                <li class="menu-item" data-section="curriculum">
+                    <i class="fas fa-book-open"></i>
+                    <span>Curriculum</span>
+                </li>
+                <li class="menu-item" data-section="yearOverview">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Year Overview</span>
+                </li>
+                <li class="menu-item" data-section="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </li>
+                <li class="menu-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="pageSubtitle">Welcome to SGSA Scouts Admin Portal</p>
+                </div>
+                <div class="header-right">
+                    <div class="admin-info">
+                        <span id="adminName">Admin User</span>
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalScouts">0</h3>
+                            <p>Total Scouts</p>
+                        </div>
+                    </div>
+                    <div class="stat-card cubs">
+                        <div class="stat-icon">
+                            <i class="fas fa-baby"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="dashboardCubsCount">0</h3>
+                            <p>Cubs & Brownies</p>
+                        </div>
+                    </div>
+                    <div class="stat-card scouts">
+                        <div class="stat-icon">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="dashboardScoutsCount">0</h3>
+                            <p>Scouts</p>
+                        </div>
+                    </div>
+                    <div class="stat-card rovers">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="dashboardRoversCount">0</h3>
+                            <p>Rovers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="secondary-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="presentToday">0</h3>
+                            <p>Present Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="attendanceRate">0%</h3>
+                            <p>Attendance Rate</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="weeksSoFar">0</h3>
+                            <p>Weeks This Year</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions">
+                    <button class="action-btn primary" onclick="showSection('attendance')">
+                        <i class="fas fa-clipboard-check"></i>
+                        Take Attendance
+                    </button>
+                    <button class="action-btn secondary" onclick="showSection('scouts')">
+                        <i class="fas fa-user-plus"></i>
+                        Add New Scout
+                    </button>
+                    <button class="action-btn tertiary" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        Export Reports
+                    </button>
+                </div>
+            </section>
+
+            <!-- Scout Roster Section -->
+            <section id="scoutsSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Scout Roster</h2>
+                        <p>Manage scout enrollment and information by team</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="add-btn secondary" onclick="showBulkImportModal()">
+                            <i class="fas fa-file-excel"></i>
+                            Import Excel
+                        </button>
+                        <button class="add-btn" onclick="showAddScoutModal()">
+                            <i class="fas fa-plus"></i>
+                            Add Scout
+                        </button>
+                    </div>
+                </div>
+
+                <div class="team-controls">
+                    <div class="team-selector">
+                        <label for="teamFilter">Select Team:</label>
+                        <select id="teamFilter" class="team-select" onchange="filterScoutsByTeam()">
+                            <option value="all">All Teams</option>
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts">Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="scoutSearch" placeholder="Search scouts by name or grade..." onkeyup="filterScouts()">
+                    </div>
+                </div>
+
+                <div class="team-stats" id="teamStats">
+                    <div class="stat-row">
+                        <div class="team-stat-card" id="cubsStats">
+                            <div class="stat-icon cubs"><i class="fas fa-baby"></i></div>
+                            <div class="stat-content">
+                                <h4>Cubs & Brownies</h4>
+                                <span class="stat-number" id="cubsCount">0</span>
+                                <span class="stat-label">scouts</span>
+                            </div>
+                        </div>
+                        <div class="team-stat-card" id="scoutsStats">
+                            <div class="stat-icon scouts"><i class="fas fa-child"></i></div>
+                            <div class="stat-content">
+                                <h4>Scouts</h4>
+                                <span class="stat-number" id="scoutsCount">0</span>
+                                <span class="stat-label">scouts</span>
+                            </div>
+                        </div>
+                        <div class="team-stat-card" id="roversStats">
+                            <div class="stat-icon rovers"><i class="fas fa-user-graduate"></i></div>
+                            <div class="stat-content">
+                                <h4>Rovers</h4>
+                                <span class="stat-number" id="roversCount">0</span>
+                                <span class="stat-label">scouts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scouts-grid" id="scoutsGrid">
+                    <!-- Scouts will be populated here -->
+                </div>
+            </section>
+
+            <!-- Troop Management Section -->
+            <section id="troopsSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Troop Management</h2>
+                        <p>Organize teams into troops with designated leaders</p>
+                    </div>
+                    <button class="add-btn" onclick="showAddTroopModal()">
+                        <i class="fas fa-plus"></i>
+                        Create New Troop
+                    </button>
+                </div>
+
+                <!-- Team Selector -->
+                <div class="troops-controls">
+                    <div class="team-selector">
+                        <label for="troopTeamFilter">Select Team:</label>
+                        <select id="troopTeamFilter" class="team-select" onchange="loadTroopsForTeam()">
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts" selected>Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                    </div>
+                    <div class="troop-stats">
+                        <span class="stat-item">
+                            <strong id="totalTroopsCount">0</strong> troops
+                        </span>
+                        <span class="stat-item">
+                            <strong id="unassignedScoutsCount">0</strong> unassigned scouts
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Troops Grid -->
+                <div class="troops-container">
+                    <div class="troops-grid" id="troopsGrid">
+                        <!-- Troops will be populated here -->
+                    </div>
+
+                    <!-- Unassigned Scouts Panel -->
+                    <div class="unassigned-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-user-plus"></i> Unassigned Scouts</h3>
+                            <span class="scout-count" id="unassignedCount">0</span>
+                        </div>
+                        <div class="unassigned-scouts" id="unassignedScouts">
+                            <!-- Unassigned scouts will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendanceSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Attendance Tracking</h2>
+                        <p>Weekly attendance management by team</p>
+                    </div>
+                    <div class="attendance-controls">
+                        <select id="attendanceTeamFilter" class="team-select" onchange="loadAttendanceForTeam()">
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts" selected>Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                        <input type="date" id="attendanceDate" class="date-input">
+                        <button class="load-attendance-btn" onclick="loadAttendance()">
+                            <i class="fas fa-calendar-day"></i>
+                            Load Date
+                        </button>
+                    </div>
+                </div>
+
+                <div class="attendance-sheet" id="attendanceSheet">
+                    <!-- Attendance sheet will be populated here -->
+                </div>
+
+                <div class="attendance-actions">
+                    <button class="action-btn primary" onclick="saveAttendance()">
+                        <i class="fas fa-save"></i>
+                        Save Attendance
+                    </button>
+                    <button class="action-btn secondary" onclick="markAllPresent()">
+                        <i class="fas fa-check-double"></i>
+                        Mark All Present
+                    </button>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Reports & Analytics</h2>
+                        <p>Generate and export attendance reports</p>
+                    </div>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Monthly Attendance Report</h3>
+                        <p>Detailed attendance breakdown by month</p>
+                        <button class="report-btn" onclick="generateMonthlyReport()">
+                            <i class="fas fa-calendar-alt"></i>
+                            Generate Report
+                        </button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Scout List Export</h3>
+                        <p>Complete roster with contact information</p>
+                        <button class="report-btn" onclick="exportScoutList()">
+                            <i class="fas fa-users"></i>
+                            Export List
+                        </button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Attendance Summary</h3>
+                        <p>Individual scout attendance statistics</p>
+                        <button class="report-btn" onclick="exportAttendanceSummary()">
+                            <i class="fas fa-chart-pie"></i>
+                            Export Summary
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Announcements Section -->
+            <section id="announcementsSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Announcements</h2>
+                        <p>Manage announcements displayed on the main website</p>
+                    </div>
+                    <button class="add-btn" onclick="showAddAnnouncementModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Announcement
+                    </button>
+                </div>
+
+                <div class="announcements-grid" id="announcementsGrid">
+                    <!-- Announcements will be populated here -->
+                </div>
+            </section>
+
+            <!-- Calendar & Events Section -->
+            <section id="calendarSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Calendar & Events</h2>
+                        <p>Manage events and view RSVP responses</p>
+                    </div>
+                    <button class="add-btn" onclick="showAddEventModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Event
+                    </button>
+                </div>
+
+                <div class="calendar-admin-tabs">
+                    <button class="tab-btn active" data-tab="events">
+                        <i class="fas fa-calendar-plus"></i>
+                        Manage Events
+                    </button>
+                    <button class="tab-btn" data-tab="rsvps">
+                        <i class="fas fa-users"></i>
+                        View RSVPs
+                    </button>
+                </div>
+
+                <!-- Events Management Tab -->
+                <div id="eventsTab" class="tab-content active">
+                    <div class="events-controls">
+                        <div class="filter-controls">
+                            <select id="eventTypeFilter" class="admin-filter-select" onchange="filterAdminEvents()">
+                                <option value="all">All Types</option>
+                                <option value="meeting">Meetings</option>
+                                <option value="event">Events</option>
+                                <option value="special">Special Events</option>
+                            </select>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="eventSearchInput" placeholder="Search events..." onkeyup="filterAdminEvents()">
+                            </div>
+                        </div>
+                        <div class="events-stats">
+                            <span class="stat-item">
+                                <strong id="totalEventsCount">0</strong> events
+                            </span>
+                            <span class="stat-item">
+                                <strong id="upcomingEventsCount">0</strong> upcoming
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="events-grid" id="eventsGrid">
+                        <!-- Events will be populated here -->
+                    </div>
+                </div>
+
+                <!-- RSVPs Tab -->
+                <div id="rsvpsTab" class="tab-content">
+                    <div class="rsvp-controls">
+                        <div class="filter-controls">
+                            <select id="rsvpEventFilter" class="admin-filter-select" onchange="filterRSVPs()">
+                                <option value="all">All Events</option>
+                                <!-- Will be populated with events -->
+                            </select>
+                            <select id="rsvpStatusFilter" class="admin-filter-select" onchange="filterRSVPs()">
+                                <option value="all">All Statuses</option>
+                                <option value="attending">Attending</option>
+                                <option value="not-attending">Not Attending</option>
+                            </select>
+                            <select id="rsvpTeamFilter" class="admin-filter-select" onchange="filterRSVPs()">
+                                <option value="all">All Teams</option>
+                                <option value="cubs">Cubs & Brownies</option>
+                                <option value="scouts">Scouts</option>
+                                <option value="rovers">Rovers</option>
+                            </select>
+                        </div>
+                        <div class="rsvp-stats">
+                            <span class="stat-item">
+                                <strong id="totalRSVPsCount">0</strong> responses
+                            </span>
+                            <span class="stat-item">
+                                <strong id="attendingCount">0</strong> attending
+                            </span>
+                            <span class="stat-item">
+                                <strong id="notAttendingCount">0</strong> not attending
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="rsvp-list" id="rsvpList">
+                        <!-- RSVPs will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photo Gallery Section -->
+            <section id="gallerySection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Photo Gallery Management</h2>
+                        <p>Upload and manage photos displayed on the website gallery</p>
+                    </div>
+                    <button class="add-btn" onclick="showAddPhotoModal()">
+                        <i class="fas fa-plus"></i>
+                        Upload Photo
+                    </button>
+                </div>
+
+                <div class="gallery-admin-controls">
+                    <div class="gallery-filter-controls">
+                        <select id="adminGalleryFilter" class="admin-filter-select" onchange="filterAdminGallery()">
+                            <option value="all">All Categories</option>
+                            <option value="cubs">Cubs & Brownies</option>
+                            <option value="scouts">Scouts</option>
+                            <option value="rovers">Rovers</option>
+                            <option value="events">Events</option>
+                            <option value="activities">Activities</option>
+                        </select>
+                        <div class="gallery-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="gallerySearchInput" placeholder="Search photos..." onkeyup="filterAdminGallery()">
+                        </div>
+                    </div>
+                    <div class="gallery-stats">
+                        <span class="stat-item">
+                            <strong id="totalPhotosCount">0</strong> photos
+                        </span>
+                        <span class="stat-item">
+                            <strong id="activePhotosCount">0</strong> active
+                        </span>
+                    </div>
+                </div>
+
+                <div class="admin-gallery-grid" id="adminGalleryGrid">
+                    <div class="gallery-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading photos...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Curriculum Section -->
+            <section id="curriculumSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Curriculum Management</h2>
+                        <p>Manage weekly curriculum content and activities by team</p>
+                    </div>
+                    <div class="curriculum-controls">
+                        <select id="curriculumTeamSelect" class="team-select" onchange="loadCurriculumForTeam()">
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts" selected>Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                        <select id="programYearSelect" class="year-select">
+                            <option value="">Select Program Year</option>
+                        </select>
+                        <button class="action-btn secondary" onclick="initializeCurrentYear()">
+                            <i class="fas fa-calendar-plus"></i>
+                            Initialize Current Year
+                        </button>
+                    </div>
+                </div>
+
+                <div class="curriculum-content">
+                    <div class="curriculum-view-controls">
+                        <div class="view-toggle">
+                            <button class="view-btn active" onclick="switchToWeekView()" id="weekViewBtn">
+                                <i class="fas fa-file-alt"></i>
+                                Week View
+                            </button>
+                            <button class="view-btn" onclick="switchToGridView()" id="gridViewBtn">
+                                <i class="fas fa-th"></i>
+                                Grid View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Week View -->
+                    <div class="curriculum-week-container" id="weekViewContainer">
+                        <div class="curriculum-navigation">
+                            <div class="week-selector">
+                                <button class="week-nav-btn" onclick="navigateWeek(-1)" id="prevWeekBtn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="week-display">
+                                    <span class="week-label">Week</span>
+                                    <span class="week-number" id="currentWeekNumber">1</span>
+                                    <span class="week-date" id="currentWeekDate">Select a year</span>
+                                </div>
+                                <button class="week-nav-btn" onclick="navigateWeek(1)" id="nextWeekBtn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="week-actions">
+                                <button class="action-btn primary" onclick="editCurrentWeek()" id="editWeekBtn" disabled>
+                                    <i class="fas fa-edit"></i>
+                                    Edit Week
+                                </button>
+                                <button class="action-btn tertiary" onclick="copyFromPreviousWeek()" id="copyWeekBtn" disabled>
+                                    <i class="fas fa-copy"></i>
+                                    Copy Previous
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="curriculum-display" id="curriculumDisplay">
+                            <div class="curriculum-placeholder">
+                                <i class="fas fa-book-open"></i>
+                                <h3>Select a Program Year</h3>
+                                <p>Choose a program year to view and edit curriculum content</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid View -->
+                    <div class="curriculum-grid-container" id="gridViewContainer" style="display: none;">
+                        <div class="curriculum-grid-header">
+                            <h3>Program Year Overview</h3>
+                            <div class="grid-controls">
+                                <input type="text" id="gridSearchInput" placeholder="Search weeks..." class="grid-search">
+                                <select id="monthFilterSelect" class="month-filter">
+                                    <option value="">All Months</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="curriculum-grid" id="curriculumGrid">
+                            <!-- Grid items will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Year Overview Section -->
+            <section id="yearOverviewSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Year Overview</h2>
+                        <p>SGSA Sea Scouts program structure and planning reference</p>
+                    </div>
+                </div>
+
+                <div class="year-overview-content">
+                    <!-- Structure Overview -->
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <i class="fas fa-calendar-week"></i>
+                            <h3>Program Structure</h3>
+                        </div>
+                        <div class="overview-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Duration:</span>
+                                <span class="detail-value">September–June (school year)</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Frequency:</span>
+                                <span class="detail-value">Weekly (Tuesdays, 6:15 pm–7:45 pm)</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Format per meeting:</span>
+                                <span class="detail-value">90 minutes total</span>
+                            </div>
+                        </div>
+                        <div class="meeting-format">
+                            <h4>Meeting Format (90 minutes):</h4>
+                            <div class="format-timeline">
+                                <div class="timeline-item">
+                                    <span class="time">6:15–6:25</span>
+                                    <span class="activity">Opening / Flag / Attendance / Brief announcements</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="time">6:25–6:50</span>
+                                    <span class="activity">Skill-building or lesson segment</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="time">6:50–7:35</span>
+                                    <span class="activity">Hands-on activity or challenge</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="time">7:35–7:45</span>
+                                    <span class="activity">Reflection, announcements, closing</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Themes -->
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <i class="fas fa-calendar"></i>
+                            <h3>Monthly Themes</h3>
+                        </div>
+                        <p class="theme-description">Rotate between Sea Scouting skills, leadership/teamwork, and adventure/creative projects.</p>
+                        <div class="themes-table">
+                            <div class="theme-row header">
+                                <div class="theme-month">Month</div>
+                                <div class="theme-title">Theme</div>
+                                <div class="theme-focus">Focus Area</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">September</div>
+                                <div class="theme-title">Team Building & Leadership</div>
+                                <div class="theme-focus">Patrol formation, knots refresher, communication games</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">October</div>
+                                <div class="theme-title">Seamanship Basics</div>
+                                <div class="theme-focus">Navigation, signals, first aid on the water</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">November</div>
+                                <div class="theme-title">Environment & Conservation</div>
+                                <div class="theme-focus">Water stewardship, shoreline cleanup planning</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">December</div>
+                                <div class="theme-title">Holiday Service Project</div>
+                                <div class="theme-focus">Build or prepare community gifts, winter safety on water</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">January</div>
+                                <div class="theme-title">Survival & Outdoor Skills</div>
+                                <div class="theme-focus">Cold-weather prep, shelter building, compass & map skills</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">February</div>
+                                <div class="theme-title">Citizenship & Service</div>
+                                <div class="theme-focus">Leadership challenges, volunteer project planning</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">March</div>
+                                <div class="theme-title">Nautical Engineering Fun</div>
+                                <div class="theme-focus">Build model boats, buoyancy experiments, gear maintenance</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">April</div>
+                                <div class="theme-title">Preparation for Ceremonies & Awards</div>
+                                <div class="theme-focus">Skills review, personal badge progress, service wrap-up</div>
+                            </div>
+                            <div class="theme-row">
+                                <div class="theme-month">May–June</div>
+                                <div class="theme-title">Major Project / Expedition Prep</div>
+                                <div class="theme-focus">Practice for end-of-year camp/boating day</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Weekly Breakdown -->
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <i class="fas fa-list-alt"></i>
+                            <h3>Sample Weekly Breakdown</h3>
+                        </div>
+                        <div class="monthly-breakdown">
+                            <div class="month-section">
+                                <h4>September (Team Building & Leadership)</h4>
+                                <ul class="week-list">
+                                    <li><strong>Week 1:</strong> Icebreaker games, patrol formation, flag ceremony practice</li>
+                                    <li><strong>Week 2:</strong> Knot relay race — teach and test basic knots</li>
+                                    <li><strong>Week 3:</strong> Leadership styles workshop + role-playing scenarios</li>
+                                    <li><strong>Week 4:</strong> Compass course in the gym/outdoors</li>
+                                </ul>
+                            </div>
+                            <div class="month-section">
+                                <h4>October (Seamanship Basics)</h4>
+                                <ul class="week-list">
+                                    <li><strong>Week 1:</strong> Parts of a boat – hands-on with model or diagrams</li>
+                                    <li><strong>Week 2:</strong> Maritime signals & flags — decode a secret message</li>
+                                    <li><strong>Week 3:</strong> Lifejacket drill – proper fit and emergency procedure</li>
+                                    <li><strong>Week 4:</strong> Boating trip planning and safety checklist</li>
+                                </ul>
+                            </div>
+                            <div class="month-section">
+                                <h4>November (Environment & Conservation)</h4>
+                                <ul class="week-list">
+                                    <li><strong>Week 1:</strong> Microplastics and the Great Lakes – short talk & experiment</li>
+                                    <li><strong>Week 2:</strong> Plan a shoreline cleanup or recycling drive</li>
+                                    <li><strong>Week 3:</strong> Build small birdhouses or fish habitats</li>
+                                    <li><strong>Week 4:</strong> Presentation night — scouts show their project</li>
+                                </ul>
+                            </div>
+                            <div class="month-section">
+                                <h4>January (Survival Skills)</h4>
+                                <ul class="week-list">
+                                    <li><strong>Week 1:</strong> Map & compass treasure hunt</li>
+                                    <li><strong>Week 2:</strong> Winter survival shelter challenge (indoors with materials)</li>
+                                    <li><strong>Week 3:</strong> Fire safety and cooking without a stove demo</li>
+                                    <li><strong>Week 4:</strong> First aid scenarios (hypothermia, bleeding, fractures)</li>
+                                </ul>
+                            </div>
+                            <div class="month-section">
+                                <h4>March (Nautical Engineering Fun)</h4>
+                                <ul class="week-list">
+                                    <li><strong>Week 1:</strong> Buoyancy and density experiments</li>
+                                    <li><strong>Week 2:</strong> Build mini sailboats or paddle boats from recycled material</li>
+                                    <li><strong>Week 3:</strong> Test boats in a large tub or small pool</li>
+                                    <li><strong>Week 4:</strong> Team "shipwreck rescue" scenario</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Core Elements -->
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <i class="fas fa-key"></i>
+                            <h3>Core Elements to Include Each Week</h3>
+                        </div>
+                        <div class="core-elements">
+                            <div class="element-item">
+                                <div class="element-icon">
+                                    <i class="fas fa-redo-alt"></i>
+                                </div>
+                                <div class="element-content">
+                                    <h5>Skill Review</h5>
+                                    <p>A small segment at the start of each month revisiting previously learned skills.</p>
+                                </div>
+                            </div>
+                            <div class="element-item">
+                                <div class="element-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="element-content">
+                                    <h5>Scout Leadership Opportunities</h5>
+                                    <p>Let senior scouts lead flag, run a game, or teach a knot.</p>
+                                </div>
+                            </div>
+                            <div class="element-item">
+                                <div class="element-icon">
+                                    <i class="fas fa-handshake"></i>
+                                </div>
+                                <div class="element-content">
+                                    <h5>Community Link</h5>
+                                    <p>At least once per term, connect with a local organization (e.g., conservation authority, Coast Guard, or marine engineer guest speaker).</p>
+                                </div>
+                            </div>
+                            <div class="element-item">
+                                <div class="element-icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="element-content">
+                                    <h5>Reflection</h5>
+                                    <p>Finish each meeting with "one thing I learned" or "one thing I'm proud of."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Admin Settings</h2>
+                        <p>Manage admin preferences and system settings</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>Meeting Schedule</h3>
+                        <div class="setting-content">
+                            <label>Meeting Day:</label>
+                            <select id="meetingDay">
+                                <option value="tuesday">Tuesday</option>
+                                <option value="wednesday">Wednesday</option>
+                                <option value="thursday">Thursday</option>
+                            </select>
+                            <label>Meeting Time:</label>
+                            <input type="time" id="meetingTime" value="18:15">
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <h3>Program Dates</h3>
+                        <div class="setting-content">
+                            <label>Program Start:</label>
+                            <input type="date" id="programStart">
+                            <label>Program End:</label>
+                            <input type="date" id="programEnd">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="action-btn primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i>
+                    Save Settings
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Announcement Modal -->
+    <div id="addAnnouncementModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Add New Announcement</h3>
+                <button class="close-btn" onclick="closeModal('addAnnouncementModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addAnnouncementForm" class="announcement-form">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required maxlength="100" placeholder="Enter announcement title">
+                </div>
+                <div class="form-group">
+                    <label>Content *</label>
+                    <textarea name="content" required rows="5" placeholder="Enter announcement content" maxlength="500"></textarea>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="form-group">
+                    <label>Add Images (Optional)</label>
+                    <div class="announcement-image-upload">
+                        <div class="upload-zone-small" id="announcementUploadZone">
+                            <div class="upload-icon-small">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <span>Click to add images</span>
+                            <input type="file" id="announcementImageInput" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div class="image-previews" id="announcementImagePreviews">
+                            <!-- Image previews will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority *</label>
+                        <select name="priority" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select name="active" required>
+                            <option value="true" selected>Active</option>
+                            <option value="false">Draft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Preview</label>
+                    <div id="announcementPreview" class="announcement-preview">
+                        <div class="preview-title">Your announcement title will appear here</div>
+                        <div class="preview-content">Your announcement content will appear here</div>
+                        <div class="preview-images" id="previewImages"></div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('addAnnouncementModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        Add Announcement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Announcement Modal -->
+    <div id="editAnnouncementModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Announcement</h3>
+                <button class="close-btn" onclick="closeModal('editAnnouncementModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editAnnouncementForm" class="announcement-form">
+                <input type="hidden" name="announcementId">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required maxlength="100" placeholder="Enter announcement title">
+                </div>
+                <div class="form-group">
+                    <label>Content *</label>
+                    <textarea name="content" required rows="5" placeholder="Enter announcement content" maxlength="500"></textarea>
+                </div>
+
+                <!-- Edit Image Upload Section -->
+                <div class="form-group">
+                    <label>Images</label>
+                    <div class="announcement-image-upload">
+                        <div class="upload-zone-small" id="editAnnouncementUploadZone">
+                            <div class="upload-icon-small">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <span>Click to add images</span>
+                            <input type="file" id="editAnnouncementImageInput" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div class="image-previews" id="editAnnouncementImagePreviews">
+                            <!-- Current and new image previews will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority *</label>
+                        <select name="priority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select name="active" required>
+                            <option value="true">Active</option>
+                            <option value="false">Draft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Preview</label>
+                    <div id="editAnnouncementPreview" class="announcement-preview">
+                        <div class="preview-title">Your announcement title will appear here</div>
+                        <div class="preview-content">Your announcement content will appear here</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editAnnouncementModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Update Announcement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="bulkImportModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Bulk Import Scouts from Excel</h3>
+                <button class="close-btn" onclick="closeModal('bulkImportModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="import-content">
+                <div class="import-instructions">
+                    <h4><i class="fas fa-info-circle"></i> Import Instructions</h4>
+                    <p>Upload an Excel file (.xlsx) with scout information. The file should have the following columns:</p>
+                    <div class="required-columns">
+                        <div class="column-item required">
+                            <span class="column-name">First Name</span>
+                            <span class="column-type">Required</span>
+                        </div>
+                        <div class="column-item required">
+                            <span class="column-name">Last Name</span>
+                            <span class="column-type">Required</span>
+                        </div>
+                        <div class="column-item required">
+                            <span class="column-name">Grade</span>
+                            <span class="column-type">Required (3-12 or Post-Secondary)</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">Birth Date</span>
+                            <span class="column-type">Optional (YYYY-MM-DD)</span>
+                        </div>
+                        <div class="column-item required">
+                            <span class="column-name">Parent Name</span>
+                            <span class="column-type">Required</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">Parent Email</span>
+                            <span class="column-type">Optional</span>
+                        </div>
+                        <div class="column-item required">
+                            <span class="column-name">Parent Phone</span>
+                            <span class="column-type">Required</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">Emergency Contact</span>
+                            <span class="column-type">Optional</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">Notes</span>
+                            <span class="column-type">Optional</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="import-upload">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h4>Drop Excel file here or click to browse</h4>
+                        <p>Supports .xlsx files up to 5MB</p>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;">
+                        <button class="browse-btn" onclick="document.getElementById('excelFileInput').click()">
+                            <i class="fas fa-folder-open"></i>
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+
+                <div class="import-preview" id="importPreview" style="display: none;">
+                    <h4><i class="fas fa-eye"></i> Preview Data</h4>
+                    <div class="preview-stats">
+                        <span class="stat-item">
+                            <strong id="totalRows">0</strong> scouts found
+                        </span>
+                        <span class="stat-item">
+                            <strong id="validRows">0</strong> valid
+                        </span>
+                        <span class="stat-item">
+                            <strong id="errorRows">0</strong> with errors
+                        </span>
+                    </div>
+                    <div class="preview-table-container">
+                        <table class="preview-table" id="previewTable">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Grade</th>
+                                    <th>Parent Name</th>
+                                    <th>Parent Phone</th>
+                                    <th>Issues</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preview rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="import-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('bulkImportModal')">Cancel</button>
+                    <button type="button" class="action-btn primary" id="importScoutsBtn" onclick="importScouts()" disabled>
+                        <i class="fas fa-upload"></i>
+                        Import Scouts
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Curriculum Modal -->
+    <div id="editCurriculumModal" class="modal" style="display: none;">
+        <div class="modal-content extra-large">
+            <div class="modal-header">
+                <h3 id="curriculumModalTitle">Edit Week Curriculum</h3>
+                <button class="close-btn" onclick="closeModal('editCurriculumModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editCurriculumForm" class="curriculum-form">
+                <input type="hidden" name="programYear">
+                <input type="hidden" name="weekNumber">
+
+                <div class="curriculum-form-header">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Week Number</label>
+                            <input type="number" name="displayWeek" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Meeting Date</label>
+                            <input type="date" name="meetingDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Theme/Topic *</label>
+                            <input type="text" name="theme" required placeholder="e.g., Team Building & Leadership">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="curriculum-sections">
+                    <div class="curriculum-section">
+                        <h4><i class="fas fa-bullseye"></i> Learning Objectives</h4>
+                        <textarea name="objectives" rows="3" placeholder="What will scouts learn this week?"></textarea>
+                    </div>
+
+                    <div class="curriculum-section">
+                        <h4><i class="fas fa-list-check"></i> Activities & Content</h4>
+                        <div class="activity-list" id="activitiesList">
+                            <div class="activity-item">
+                                <input type="text" placeholder="Activity name" class="activity-name">
+                                <input type="number" placeholder="Duration (min)" class="activity-duration" min="1" max="90">
+                                <textarea placeholder="Activity description" class="activity-description" rows="2"></textarea>
+                                <button type="button" class="remove-activity-btn" onclick="removeActivity(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="action-btn tertiary small" onclick="addActivity()">
+                            <i class="fas fa-plus"></i>
+                            Add Activity
+                        </button>
+                    </div>
+
+                    <div class="curriculum-section">
+                        <h4><i class="fas fa-tools"></i> Materials Needed</h4>
+                        <textarea name="materials" rows="3" placeholder="List all materials, equipment, and supplies needed"></textarea>
+                    </div>
+
+                    <div class="curriculum-section">
+                        <h4><i class="fas fa-clipboard-check"></i> Assessment & Reflection</h4>
+                        <textarea name="assessment" rows="3" placeholder="How will you assess learning? Any reflection questions?"></textarea>
+                    </div>
+
+                    <div class="curriculum-section">
+                        <h4><i class="fas fa-sticky-note"></i> Notes & Reminders</h4>
+                        <textarea name="notes" rows="3" placeholder="Additional notes, safety considerations, or reminders"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editCurriculumModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Save Curriculum
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Scout Modal -->
+    <div id="addScoutModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Add New Scout</h3>
+                <button class="close-btn" onclick="closeModal('addScoutModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addScoutForm" class="scout-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Grade *</label>
+                        <select name="grade" required onchange="updateTeamFromGrade(this)">
+                            <option value="">Select Grade</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                            <option value="post-secondary">Post-Secondary</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team *</label>
+                        <select name="team" required readonly style="background-color: #f5f5f5;">
+                            <option value="">Auto-assigned based on grade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Birth Date</label>
+                        <input type="date" name="birthDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Parent/Guardian Name *</label>
+                        <input type="text" name="parentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Email</label>
+                        <input type="email" name="parentEmail">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Parent Phone *</label>
+                        <input type="tel" name="parentPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Contact</label>
+                        <input type="tel" name="emergencyContact">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes</label>
+                    <textarea name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('addScoutModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        Add Scout
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Scout Modal -->
+    <div id="editScoutModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Scout</h3>
+                <button class="close-btn" onclick="closeModal('editScoutModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editScoutForm" class="scout-form">
+                <input type="hidden" name="scoutId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Grade *</label>
+                        <select name="grade" required onchange="updateTeamFromGradeEdit(this)">
+                            <option value="">Select Grade</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                            <option value="post-secondary">Post-Secondary</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team *</label>
+                        <select name="team" required readonly style="background-color: #f5f5f5;">
+                            <option value="">Auto-assigned based on grade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Birth Date</label>
+                        <input type="date" name="birthDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Parent/Guardian Name *</label>
+                        <input type="text" name="parentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Email</label>
+                        <input type="email" name="parentEmail">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Parent Phone *</label>
+                        <input type="tel" name="parentPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Contact</label>
+                        <input type="tel" name="emergencyContact">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes</label>
+                    <textarea name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editScoutModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Update Scout
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Photo Modal -->
+    <div id="addPhotoModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Upload New Photo</h3>
+                <button class="close-btn" onclick="closeModal('addPhotoModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addPhotoForm" class="photo-form">
+                <div class="photo-upload-area">
+                    <div class="upload-zone" id="photoUploadZone">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h4>Drop photo here or click to browse</h4>
+                        <p>Supports JPG, PNG, GIF up to 10MB</p>
+                        <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
+                        <button type="button" class="browse-btn" onclick="document.getElementById('photoFileInput').click()">
+                            <i class="fas fa-folder-open"></i>
+                            Browse Files
+                        </button>
+                    </div>
+                    <div class="photo-preview" id="photoPreview" style="display: none;">
+                        <img id="previewImage" src="" alt="Preview">
+                        <button type="button" class="remove-photo-btn" onclick="removePhotoPreview()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Photo Title *</label>
+                        <input type="text" name="title" required maxlength="100" placeholder="e.g., Cubs Team Building Activity">
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="cubs">Cubs & Brownies</option>
+                            <option value="scouts">Scouts</option>
+                            <option value="rovers">Rovers</option>
+                            <option value="events">Events</option>
+                            <option value="activities">Activities</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" maxlength="200" placeholder="Brief description of the photo"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select name="active" required>
+                            <option value="true" selected>Active (Visible on website)</option>
+                            <option value="false">Draft (Hidden)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">Uploading...</span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('addPhotoModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary" id="uploadPhotoBtn">
+                        <i class="fas fa-upload"></i>
+                        Upload Photo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Photo Modal -->
+    <div id="editPhotoModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Photo</h3>
+                <button class="close-btn" onclick="closeModal('editPhotoModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editPhotoForm" class="photo-form">
+                <input type="hidden" name="photoId">
+
+                <div class="current-photo-display">
+                    <img id="editPhotoPreview" src="" alt="Current photo" class="current-photo">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Photo Title *</label>
+                        <input type="text" name="title" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="cubs">Cubs & Brownies</option>
+                            <option value="scouts">Scouts</option>
+                            <option value="rovers">Rovers</option>
+                            <option value="events">Events</option>
+                            <option value="activities">Activities</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" maxlength="200"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select name="active" required>
+                            <option value="true">Active (Visible on website)</option>
+                            <option value="false">Draft (Hidden)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="action-btn tertiary" onclick="deletePhoto()">
+                        <i class="fas fa-trash"></i>
+                        Delete Photo
+                    </button>
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editPhotoModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Update Photo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification">
+        <div class="notification-content">
+            <i class="notification-icon"></i>
+            <span class="notification-message"></span>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Add New Event</h3>
+                <button class="close-btn" onclick="closeModal('addEventModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addEventForm" class="event-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Title *</label>
+                        <input type="text" name="title" required maxlength="100" placeholder="Scout Activity, Special Event, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Type *</label>
+                        <select name="type" required>
+                            <option value="">Select Type</option>
+                            <option value="event">Regular Event</option>
+                            <option value="special">Special Event</option>
+                            <option value="meeting">Meeting (Custom)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Date *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" name="startTime" placeholder="18:15">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" name="endTime" placeholder="19:45">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Description</label>
+                    <textarea name="description" rows="4" maxlength="500" placeholder="Describe the event, what to bring, special instructions, etc."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" maxlength="100" placeholder="Regular meeting location">
+                    </div>
+                    <div class="form-group">
+                        <label>Teams Invited</label>
+                        <select name="teamsInvited" multiple>
+                            <option value="cubs">Cubs & Brownies</option>
+                            <option value="scouts">Scouts</option>
+                            <option value="rovers">Rovers</option>
+                        </select>
+                        <small>Hold Ctrl/Cmd to select multiple teams</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>RSVP Required?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="rsvpRequired" value="true" checked>
+                                Yes, RSVP required
+                            </label>
+                            <label>
+                                <input type="radio" name="rsvpRequired" value="false">
+                                No RSVP needed
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Status</label>
+                        <select name="status">
+                            <option value="active" selected>Active</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="postponed">Postponed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Recurring Event Settings -->
+                <div class="form-section">
+                    <h4>Recurring Event Settings</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Repeat Event?</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="recurring" value="false" checked onchange="toggleRecurringOptions(false)">
+                                    One-time event
+                                </label>
+                                <label>
+                                    <input type="radio" name="recurring" value="true" onchange="toggleRecurringOptions(true)">
+                                    Repeating event
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="recurringOptions" class="recurring-options" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Repeat Every *</label>
+                                <select name="repeatInterval" id="repeatInterval" disabled>
+                                    <option value="weekly">Week</option>
+                                    <option value="biweekly">2 Weeks</option>
+                                    <option value="monthly">Month</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>On Day(s) *</label>
+                                <select name="repeatDay" id="repeatDay" disabled>
+                                    <option value="0">Sunday</option>
+                                    <option value="1">Monday</option>
+                                    <option value="2" selected>Tuesday</option>
+                                    <option value="3">Wednesday</option>
+                                    <option value="4">Thursday</option>
+                                    <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Repeat Until *</label>
+                                <input type="date" name="repeatUntil" id="repeatUntil" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Skip Holidays?</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="skipHolidays" value="true" checked>
+                                        Yes, skip holidays
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="skipHolidays" value="false">
+                                        No, include holidays
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Holiday Dates to Skip</label>
+                            <textarea name="holidayDates" rows="3" placeholder="Enter dates to skip (one per line): 2025-12-25, 2025-01-01, etc."></textarea>
+                            <small>Format: YYYY-MM-DD, one date per line</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('addEventModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        Add Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="editEventModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Event</h3>
+                <button class="close-btn" onclick="closeModal('editEventModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editEventForm" class="event-form">
+                <input type="hidden" name="eventId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Title *</label>
+                        <input type="text" name="title" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Type *</label>
+                        <select name="type" required>
+                            <option value="event">Regular Event</option>
+                            <option value="special">Special Event</option>
+                            <option value="meeting">Meeting (Custom)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Date *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" name="startTime">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" name="endTime">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Description</label>
+                    <textarea name="description" rows="4" maxlength="500"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Teams Invited</label>
+                        <select name="teamsInvited" multiple>
+                            <option value="cubs">Cubs & Brownies</option>
+                            <option value="scouts">Scouts</option>
+                            <option value="rovers">Rovers</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>RSVP Required?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="rsvpRequired" value="true">
+                                Yes, RSVP required
+                            </label>
+                            <label>
+                                <input type="radio" name="rsvpRequired" value="false">
+                                No RSVP needed
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Status</label>
+                        <select name="status">
+                            <option value="active">Active</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="postponed">Postponed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editEventModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Troop Modal -->
+    <div id="addTroopModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Create New Troop</h3>
+                <button class="close-btn" onclick="closeModal('addTroopModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addTroopForm" class="troop-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Team *</label>
+                        <select name="team" id="troopTeamSelect" required>
+                            <option value="">Select Team</option>
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts">Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Troop Name *</label>
+                        <input type="text" name="troopName" required maxlength="50" placeholder="e.g., Red Hawks, Blue Sharks">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Troop Leader</label>
+                        <select name="troopLeader" id="troopLeaderSelect">
+                            <option value="">Select Leader (Optional)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assistant Leader</label>
+                        <select name="assistantLeader" id="assistantLeaderSelect">
+                            <option value="">Select Assistant (Optional)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Troop Color/Theme</label>
+                    <div class="color-selector">
+                        <div class="color-option" data-color="red" style="background: #ef4444"></div>
+                        <div class="color-option" data-color="blue" style="background: #3b82f6"></div>
+                        <div class="color-option" data-color="green" style="background: #10b981"></div>
+                        <div class="color-option" data-color="orange" style="background: #f97316"></div>
+                        <div class="color-option" data-color="purple" style="background: #8b5cf6"></div>
+                        <div class="color-option" data-color="yellow" style="background: #eab308"></div>
+                        <div class="color-option" data-color="pink" style="background: #ec4899"></div>
+                        <div class="color-option" data-color="teal" style="background: #14b8a6"></div>
+                    </div>
+                    <input type="hidden" name="troopColor" id="selectedColor" value="blue">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" maxlength="200" placeholder="Brief description of the troop's characteristics or focus"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('addTroopModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        Create Troop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Troop Modal -->
+    <div id="editTroopModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Troop</h3>
+                <button class="close-btn" onclick="closeModal('editTroopModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editTroopForm" class="troop-form">
+                <input type="hidden" name="troopId" id="editTroopId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Team *</label>
+                        <select name="team" id="editTroopTeamSelect" required disabled>
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts">Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                        <small>Team cannot be changed after creation</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Troop Name *</label>
+                        <input type="text" name="troopName" id="editTroopName" required maxlength="50">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Troop Leader</label>
+                        <select name="troopLeader" id="editTroopLeaderSelect">
+                            <option value="">Select Leader (Optional)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assistant Leader</label>
+                        <select name="assistantLeader" id="editAssistantLeaderSelect">
+                            <option value="">Select Assistant (Optional)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Troop Color/Theme</label>
+                    <div class="color-selector">
+                        <div class="color-option" data-color="red" style="background: #ef4444"></div>
+                        <div class="color-option" data-color="blue" style="background: #3b82f6"></div>
+                        <div class="color-option" data-color="green" style="background: #10b981"></div>
+                        <div class="color-option" data-color="orange" style="background: #f97316"></div>
+                        <div class="color-option" data-color="purple" style="background: #8b5cf6"></div>
+                        <div class="color-option" data-color="yellow" style="background: #eab308"></div>
+                        <div class="color-option" data-color="pink" style="background: #ec4899"></div>
+                        <div class="color-option" data-color="teal" style="background: #14b8a6"></div>
+                    </div>
+                    <input type="hidden" name="troopColor" id="editSelectedColor">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="editTroopDescription" rows="3" maxlength="200"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editTroopModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Scouts Modal -->
+    <div id="assignScoutsModal" class="modal" style="display: none;">
+        <div class="modal-content extra-large">
+            <div class="modal-header">
+                <h3 id="assignModalTitle">Assign Scouts to Troop</h3>
+                <button class="close-btn" onclick="closeModal('assignScoutsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="assign-scouts-content">
+                <div class="assign-controls">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="scoutAssignSearch" placeholder="Search scouts..." onkeyup="filterAssignableScouts()">
+                    </div>
+                    <div class="assign-actions">
+                        <button class="action-btn sm secondary" onclick="selectAllScouts()">
+                            <i class="fas fa-check-double"></i>
+                            Select All
+                        </button>
+                        <button class="action-btn sm secondary" onclick="deselectAllScouts()">
+                            <i class="fas fa-times"></i>
+                            Deselect All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="assign-grid">
+                    <div class="available-scouts">
+                        <h4><i class="fas fa-users"></i> Available Scouts</h4>
+                        <div class="scouts-list" id="availableScoutsList">
+                            <!-- Available scouts will be listed here -->
+                        </div>
+                    </div>
+
+                    <div class="current-members">
+                        <h4><i class="fas fa-flag"></i> Current Troop Members</h4>
+                        <div class="scouts-list" id="currentMembersList">
+                            <!-- Current troop members will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assign-actions-bottom">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('assignScoutsModal')">Cancel</button>
+                    <button type="button" class="action-btn primary" id="saveAssignmentsBtn" onclick="saveScoutAssignments()">
+                        <i class="fas fa-save"></i>
+                        Save Assignments
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- SheetJS for Excel processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script src="admin-script-realtime.js"></script>
+    <script src="gallery-functions.js"></script>
+    <script src="config.js"></script>
+    <script src="announcement-images.js"></script>
+    <script src="admin-calendar.js"></script>
+    <script src="admin-troops.js"></script>
+</body>
+</html>

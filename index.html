@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>SGSA Scouts - Sea Scouts Program</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="logo.jpeg" alt="SGSA Scouts Logo" class="logo">
+                    <h1>SGSA Scouts</h1>
+                </div>
+                <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#announcements-feed">Announcements</a></li>
+                    <li><a href="#calendar">Calendar</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#join">Join Us</a></li>
+                    <li><a href="admin.html" class="admin-link" title="Admin Dashboard">
+                        <i class="fas fa-user-shield"></i>
+                    </a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-waves"></div>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-anchor"></i>
+                </div>
+                <h2 class="hero-title">Welcome to SGSA Sea Scouts</h2>
+                <p class="hero-subtitle">Building Character, Leadership, and Maritime Skills for All Ages</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Scout Teams</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">3-12+</span>
+                        <span class="stat-label">Grade Levels</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">90</span>
+                        <span class="stat-label">Minutes per Meeting</span>
+                    </div>
+                </div>
+                <a href="#join" class="cta-button">
+                    <span>Join Our Adventure</span>
+                    <i class="fas fa-compass"></i>
+                </a>
+            </div>
+        </section>
+
+        <section id="announcements-feed" class="announcements-feed">
+            <div class="container">
+                <h2>Latest Announcements</h2>
+                <div id="announcementsFeed" class="announcements-feed-list">
+                    <!-- Announcements will be populated here -->
+                </div>
+            </div>
+        </section>
+
+
+        <section id="calendar" class="calendar-section">
+            <div class="container">
+                <h2>Scout Calendar & Events</h2>
+                <p class="calendar-intro">Stay up to date with all scout meetings, events, and activities. RSVP to let us know your attendance plans.</p>
+
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" id="prevMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentMonthYear">Loading...</h3>
+                        <button class="calendar-nav" id="nextMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+
+                        <!-- Calendar days will be populated by JavaScript directly here -->
+                    </div>
+                </div>
+
+                <div class="upcoming-events">
+                    <h3>Upcoming Events</h3>
+                    <div id="upcomingEventsList" class="events-list">
+                        <!-- Events will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="meeting-tracker" class="meeting-tracker">
+            <div class="container">
+                <h2>Meeting Information</h2>
+                <div class="tracker-grid">
+                    <div class="tracker-card next-meeting">
+                        <div class="tracker-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="tracker-content">
+                            <h3>Next Meeting</h3>
+                            <p class="meeting-date" id="nextMeetingDate">Loading...</p>
+                            <p class="meeting-time">Tuesday 6:15 PM - 7:45 PM</p>
+                        </div>
+                    </div>
+
+                    <div class="tracker-card countdown">
+                        <div class="tracker-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="tracker-content">
+                            <h3>Time Until Meeting</h3>
+                            <div class="countdown-display" id="countdownTimer">
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="days">0</span>
+                                    <span class="countdown-label">Days</span>
+                                </div>
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="hours">0</span>
+                                    <span class="countdown-label">Hours</span>
+                                </div>
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="minutes">0</span>
+                                    <span class="countdown-label">Minutes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tracker-card next-theme">
+                        <div class="tracker-icon">
+                            <i class="fas fa-compass"></i>
+                        </div>
+                        <div class="tracker-content">
+                            <h3>Current Theme</h3>
+                            <p class="theme-title" id="currentTheme">Loading...</p>
+                            <p class="theme-description" id="themeDescription">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="container">
+                <h2>About Our Program</h2>
+                <p>SGSA Sea Scouts offers an exciting multi-age program serving students from grades 3 through post-secondary, combining traditional scouting values with maritime skills and adventure. Our weekly meetings bring all teams together while providing age-appropriate activities that focus on teamwork, leadership development, and hands-on learning experiences.</p>
+                
+                <div class="meeting-info">
+                    <h3>Meeting Schedule</h3>
+                    <div class="schedule-grid">
+                        <div class="schedule-item">
+                            <div class="schedule-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h4>When</h4>
+                            <p>Weekly Tuesdays<br>6:15 PM - 7:45 PM</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h4>Duration</h4>
+                            <p>September - June<br>(School Year)</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <h4>Format</h4>
+                            <p>90 minutes of<br>structured activities</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Our Scout Teams Section -->
+                <div class="teams-section">
+                    <h2>Our Scout Teams</h2>
+                    <p class="teams-intro">SGSA Sea Scouts offers age-appropriate programs for three distinct teams, each with their own adventures and learning opportunities.</p>
+
+                    <div class="teams-grid">
+                        <div class="team-card cubs">
+                            <div class="team-header">
+                                <div class="team-icon">
+                                    <i class="fas fa-baby"></i>
+                                </div>
+                                <h3>Cubs & Brownies</h3>
+                                <span class="team-grades">Grades 3-6</span>
+                            </div>
+                            <div class="team-content">
+                                <p>Our youngest scouts begin their journey with fundamental skills, teamwork, and fun activities designed for elementary school students.</p>
+                                <div class="team-highlights">
+                                    <h4>Focus Areas:</h4>
+                                    <ul>
+                                        <li>Basic nautical skills</li>
+                                        <li>Team building games</li>
+                                        <li>Simple crafts and projects</li>
+                                        <li>Safety awareness</li>
+                                        <li>Environmental awareness</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="team-footer">
+                                <span class="team-age">Ages 8-11</span>
+                            </div>
+                        </div>
+
+                        <div class="team-card scouts">
+                            <div class="team-header">
+                                <div class="team-icon">
+                                    <i class="fas fa-child"></i>
+                                </div>
+                                <h3>Scouts</h3>
+                                <span class="team-grades">Grades 7-10</span>
+                            </div>
+                            <div class="team-content">
+                                <p>Middle and early high school students dive deeper into maritime skills, leadership development, and community service.</p>
+                                <div class="team-highlights">
+                                    <h4>Focus Areas:</h4>
+                                    <ul>
+                                        <li>Advanced seamanship</li>
+                                        <li>Navigation and compass skills</li>
+                                        <li>Leadership opportunities</li>
+                                        <li>Service projects</li>
+                                        <li>Outdoor adventures</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="team-footer">
+                                <span class="team-age">Ages 12-15</span>
+                            </div>
+                        </div>
+
+                        <div class="team-card rovers">
+                            <div class="team-header">
+                                <div class="team-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h3>Rovers</h3>
+                                <span class="team-grades">Grades 11+ & Post-Secondary</span>
+                            </div>
+                            <div class="team-content">
+                                <p>Our senior scouts take on advanced challenges, mentor younger members, and prepare for adult leadership roles.</p>
+                                <div class="team-highlights">
+                                    <h4>Focus Areas:</h4>
+                                    <ul>
+                                        <li>Advanced maritime skills</li>
+                                        <li>Mentoring younger scouts</li>
+                                        <li>Project leadership</li>
+                                        <li>Community engagement</li>
+                                        <li>Career preparation</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="team-footer">
+                                <span class="team-age">Ages 16+</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Themes Section -->
+                <div class="program-section">
+                    <h2>Monthly Themes</h2>
+                    <div class="themes-grid">
+                        <div class="theme-card">
+                            <h3>September</h3>
+                            <h4>Team Building & Leadership</h4>
+                            <p>Patrol formation, knots refresher, communication games</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>October</h3>
+                            <h4>Seamanship Basics</h4>
+                            <p>Navigation, signals, first aid on the water</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>November</h3>
+                            <h4>Environment & Conservation</h4>
+                            <p>Water stewardship, shoreline cleanup planning</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>December</h3>
+                            <h4>Holiday Service Project</h4>
+                            <p>Build community gifts, winter safety on water</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>January</h3>
+                            <h4>Survival & Outdoor Skills</h4>
+                            <p>Cold-weather prep, shelter building, compass & map skills</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>February</h3>
+                            <h4>Citizenship & Service</h4>
+                            <p>Leadership challenges, volunteer project planning</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>March</h3>
+                            <h4>Nautical Engineering Fun</h4>
+                            <p>Build model boats, buoyancy experiments, gear maintenance</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>April</h3>
+                            <h4>Ceremonies & Awards</h4>
+                            <p>Skills review, personal badge progress, service wrap-up</p>
+                        </div>
+                        <div class="theme-card">
+                            <h3>May-June</h3>
+                            <h4>Major Project</h4>
+                            <p>Practice for end-of-year camp/boating day</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Activities Section -->
+                <div class="activities-section">
+                    <h2>Sample Activities</h2>
+                    <div class="activities-grid">
+                        <div class="activity-card">
+                            <h3>Hands-On Learning</h3>
+                            <ul>
+                                <li>Knot relay races</li>
+                                <li>Compass treasure hunts</li>
+                                <li>Model boat building</li>
+                                <li>Navigation challenges</li>
+                            </ul>
+                        </div>
+                        <div class="activity-card">
+                            <h3>Leadership Development</h3>
+                            <ul>
+                                <li>Role-playing scenarios</li>
+                                <li>Team building games</li>
+                                <li>Scout-led activities</li>
+                                <li>Communication workshops</li>
+                            </ul>
+                        </div>
+                        <div class="activity-card">
+                            <h3>Community Service</h3>
+                            <ul>
+                                <li>Shoreline cleanup planning</li>
+                                <li>Holiday service projects</li>
+                                <li>Environmental conservation</li>
+                                <li>Volunteer project planning</li>
+                            </ul>
+                        </div>
+                        <div class="activity-card">
+                            <h3>Safety & Skills</h3>
+                            <ul>
+                                <li>First aid scenarios</li>
+                                <li>Lifejacket drills</li>
+                                <li>Winter survival challenges</li>
+                                <li>Fire safety demonstrations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="gallery" class="gallery">
+            <div class="container">
+                <h2>Photo Gallery</h2>
+                <p class="gallery-intro">Explore our scouts in action! Browse photos from meetings, activities, and special events.</p>
+
+                <div class="gallery-filters">
+                    <button class="filter-btn active" data-category="all">
+                        <i class="fas fa-th"></i>
+                        All Photos
+                    </button>
+                    <button class="filter-btn" data-category="cubs">
+                        <i class="fas fa-baby"></i>
+                        Cubs & Brownies
+                    </button>
+                    <button class="filter-btn" data-category="scouts">
+                        <i class="fas fa-child"></i>
+                        Scouts
+                    </button>
+                    <button class="filter-btn" data-category="rovers">
+                        <i class="fas fa-user-graduate"></i>
+                        Rovers
+                    </button>
+                    <button class="filter-btn" data-category="events">
+                        <i class="fas fa-calendar-star"></i>
+                        Events
+                    </button>
+                    <button class="filter-btn" data-category="activities">
+                        <i class="fas fa-anchor"></i>
+                        Activities
+                    </button>
+                </div>
+
+                <div class="gallery-grid" id="galleryGrid">
+                    <div class="gallery-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading photos...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="join" class="join">
+            <div class="container">
+                <h2>Join Our Adventure</h2>
+                <p>Ready to embark on an exciting journey of leadership, teamwork, and maritime adventure? SGSA Sea Scouts welcomes students from grades 3 through post-secondary who are eager to learn, grow, and make lasting friendships.</p>
+                
+                <div class="join-info">
+                    <div class="join-card">
+                        <h3>What You'll Gain</h3>
+                        <ul>
+                            <li>Age-appropriate leadership and teamwork skills</li>
+                            <li>Maritime knowledge and safety</li>
+                            <li>Environmental stewardship</li>
+                            <li>Community service experience</li>
+                            <li>Mentorship opportunities (older scouts)</li>
+                            <li>Lifelong friendships across age groups</li>
+                        </ul>
+                    </div>
+                    <div class="join-card">
+                        <h3>Which Team Is Right for You?</h3>
+                        <div class="team-guide">
+                            <div class="guide-item">
+                                <strong>Cubs & Brownies:</strong> Grades 3-6 (Ages 8-11)
+                            </div>
+                            <div class="guide-item">
+                                <strong>Scouts:</strong> Grades 7-10 (Ages 12-15)
+                            </div>
+                            <div class="guide-item">
+                                <strong>Rovers:</strong> Grades 11+ & Post-Secondary (Ages 16+)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="join-card">
+                        <h3>Get Started</h3>
+                        <p>Contact us to learn more about joining SGSA Sea Scouts and to find the right team for your age group.</p>
+                        <a href="#contact" class="contact-button">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- RSVP Modal -->
+    <div id="rsvpModal" class="modal" style="display: none;">
+        <div class="modal-content rsvp-modal-content">
+            <div class="modal-header">
+                <h3 id="rsvpEventTitle">Event RSVP</h3>
+                <button class="modal-close" onclick="closeRSVPModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="event-details">
+                    <div class="event-info">
+                        <h4 id="rsvpEventName">Event Name</h4>
+                        <p id="rsvpEventDate">Date & Time</p>
+                        <p id="rsvpEventDescription">Event Description</p>
+                    </div>
+                </div>
+
+                <form id="rsvpForm" class="rsvp-form">
+                    <div class="form-group">
+                        <label for="parentName">Parent/Guardian Name:</label>
+                        <input type="text" id="parentName" name="parentName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parentEmail">Contact Email:</label>
+                        <input type="email" id="parentEmail" name="parentEmail" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scoutTeam">Scout Team:</label>
+                        <select id="scoutTeam" name="scoutTeam" required>
+                            <option value="">Select Team</option>
+                            <option value="cubs">Cubs & Brownies (Grades 3-6)</option>
+                            <option value="scouts">Scouts (Grades 7-10)</option>
+                            <option value="rovers">Rovers (Grades 11+)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Scout Name:</label>
+                        <div class="name-input-group">
+                            <div class="name-field">
+                                <label for="scoutFirstName">First Name *</label>
+                                <input type="text" id="scoutFirstName" name="scoutFirstName" required placeholder="Enter first name" autocomplete="given-name">
+                            </div>
+                            <div class="name-field">
+                                <label for="scoutLastName">Last Name *</label>
+                                <input type="text" id="scoutLastName" name="scoutLastName" required placeholder="Enter last name" autocomplete="family-name">
+                            </div>
+                        </div>
+                        <small>Enter the scout's full name</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attendanceStatus">Attendance Status:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="attendanceStatus" value="attending" checked>
+                                <span class="radio-custom"></span>
+                                Will Attend
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="attendanceStatus" value="not-attending">
+                                <span class="radio-custom"></span>
+                                Cannot Attend
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="reasonGroup" style="display: none;">
+                        <label for="absentReason">Reason for Absence (Optional):</label>
+                        <textarea id="absentReason" name="absentReason" placeholder="Let us know why your scout cannot attend (optional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalNotes">Additional Notes (Optional):</label>
+                        <textarea id="additionalNotes" name="additionalNotes" placeholder="Any special notes or questions"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeRSVPModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i>
+                            Submit RSVP
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="logo.jpeg" alt="SGSA Scouts Logo" class="footer-logo-img">
+                    <h3>SGSA Scouts</h3>
+                </div>
+                <div class="footer-info">
+                    <p>Building character, leadership, and maritime skills for the next generation.</p>
+                    <p>&copy; 2024 SGSA Scouts. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- Meeting Tracker JavaScript -->
+    <script>
+        // Meeting configuration is now loaded from config.js
+        // Use window.MEETING_CONFIG to access it
+
+        // Monthly themes from the program overview
+        const MONTHLY_THEMES = {
+            9: { title: "Team Building & Leadership", description: "Patrol formation, knots refresher, communication games" },
+            10: { title: "Seamanship Basics", description: "Navigation, signals, first aid on the water" },
+            11: { title: "Environment & Conservation", description: "Water stewardship, shoreline cleanup planning" },
+            12: { title: "Holiday Service Project", description: "Build community gifts, winter safety on water" },
+            1: { title: "Survival & Outdoor Skills", description: "Cold-weather prep, shelter building, compass & map skills" },
+            2: { title: "Citizenship & Service", description: "Leadership challenges, volunteer project planning" },
+            3: { title: "Nautical Engineering Fun", description: "Build model boats, buoyancy experiments, gear maintenance" },
+            4: { title: "Ceremonies & Awards", description: "Skills review, personal badge progress, service wrap-up" },
+            5: { title: "Major Project", description: "Practice for end-of-year camp/boating day" },
+            6: { title: "Major Project", description: "Practice for end-of-year camp/boating day" }
+        };
+
+        // Calculate next meeting date
+        function getNextMeetingDate() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // Start from today
+            let nextMeeting = new Date(today);
+            
+            // Find the next Tuesday
+            while (nextMeeting.getDay() !== window.MEETING_CONFIG.day) {
+                nextMeeting.setDate(nextMeeting.getDate() + 1);
+            }
+            
+            // Set the meeting time
+            nextMeeting.setHours(window.MEETING_CONFIG.hour, window.MEETING_CONFIG.minute, 0, 0);
+            
+            // If today is Tuesday but the meeting time has passed, get next Tuesday
+            if (nextMeeting <= now) {
+                nextMeeting.setDate(nextMeeting.getDate() + 7);
+            }
+            
+            // Check if it's during the program period
+            if (nextMeeting < window.MEETING_CONFIG.programStart || nextMeeting > window.MEETING_CONFIG.programEnd) {
+                return null; // No meetings during break
+            }
+            
+            // Check for holidays
+            while (isHoliday(nextMeeting)) {
+                nextMeeting.setDate(nextMeeting.getDate() + 7);
+                if (nextMeeting > window.MEETING_CONFIG.programEnd) {
+                    return null;
+                }
+            }
+            
+            return nextMeeting;
+        }
+        
+        function isHoliday(date) {
+            return window.MEETING_CONFIG.holidays.some(holiday => 
+                holiday.getTime() === date.getTime()
+            );
+        }
+
+
+        // Get current month's theme
+        function getCurrentTheme() {
+            const now = new Date();
+            const month = now.getMonth() + 1; // JavaScript months are 0-indexed
+            
+            return MONTHLY_THEMES[month] || { 
+                title: "Program Break", 
+                description: "No meetings during summer break" 
+            };
+        }
+
+        // Update countdown timer
+        function updateCountdown() {
+            const nextMeeting = getNextMeetingDate();
+            
+            if (!nextMeeting) {
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                return;
+            }
+            
+            const now = new Date();
+            const timeDiff = nextMeeting - now;
+            
+            if (timeDiff <= 0) {
+                // Meeting is happening now or has passed
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                return;
+            }
+            
+            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            
+            // Add special classes based on time remaining
+            const countdownCard = document.querySelector('.tracker-card.countdown');
+            countdownCard.classList.remove('meeting-today', 'meeting-tomorrow');
+            
+            if (days === 0 && hours <= 2) {
+                countdownCard.classList.add('meeting-today');
+            } else if (days === 1 || (days === 0 && hours > 2)) {
+                countdownCard.classList.add('meeting-tomorrow');
+            }
+        }
+
+        // Update all meeting information
+        function updateMeetingInfo() {
+            const nextMeeting = getNextMeetingDate();
+            const currentTheme = getCurrentTheme();
+
+            // Update next meeting date
+            if (nextMeeting) {
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                document.getElementById('nextMeetingDate').textContent =
+                    nextMeeting.toLocaleDateString('en-US', options);
+            } else {
+                document.getElementById('nextMeetingDate').textContent =
+                    'No meetings scheduled';
+            }
+
+            // Update current theme
+            document.getElementById('currentTheme').textContent = currentTheme.title;
+            document.getElementById('themeDescription').textContent = currentTheme.description;
+
+            // Update countdown
+            updateCountdown();
+        }
+
+        // Initialize and start updates
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMeetingInfo();
+            loadAnnouncementsFeed();
+            loadPhotoGallery();
+            initializeMobileMenu();
+
+            // Update countdown every minute
+            setInterval(updateCountdown, 60000);
+
+            // Update all meeting info every hour
+            setInterval(updateMeetingInfo, 3600000);
+
+            // Update announcements every 5 minutes
+            setInterval(loadAnnouncementsFeed, 300000);
+        });
+
+        // Mobile Menu Functions
+        function initializeMobileMenu() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            const navLinks = document.querySelectorAll('.nav-menu a');
+
+            if (mobileToggle && navMenu) {
+                mobileToggle.addEventListener('click', function() {
+                    toggleMobileMenu();
+                });
+
+                // Close menu when clicking on links
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        closeMobileMenu();
+                    });
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('.nav-container')) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+        }
+
+        function toggleMobileMenu() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+
+            mobileToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+
+            // Prevent body scroll when menu is open
+            if (navMenu.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+
+            mobileToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Firebase Configuration for announcements feed
+        const firebaseConfig = {
+            apiKey: "AIzaSyATW5HErUw05Ij28L6974sR12lVO8Av_ew",
+            authDomain: "sgsa-kids.firebaseapp.com",
+            databaseURL: "https://sgsa-kids-default-rtdb.firebaseio.com",
+            projectId: "sgsa-kids",
+            storageBucket: "sgsa-kids.firebasestorage.app",
+            messagingSenderId: "988633336020",
+            appId: "1:988633336020:web:f9f2055d4dd7996ad51341",
+            measurementId: "G-X98HHTS026"
+        };
+
+        // Initialize Firebase for announcements
+        let announcementsApp, announcementsDatabase;
+        try {
+            announcementsApp = firebase.initializeApp(firebaseConfig, 'announcements');
+            announcementsDatabase = announcementsApp.database();
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+        }
+
+        // Load announcements feed
+        async function loadAnnouncementsFeed() {
+            if (!announcementsDatabase) {
+                console.warn('Firebase not initialized for announcements');
+                return;
+            }
+
+            try {
+                const announcementsRef = announcementsDatabase.ref('announcements');
+                const snapshot = await announcementsRef.orderByChild('timestamp').limitToLast(5).once('value');
+
+                const announcements = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const announcement = childSnapshot.val();
+                        // Only show active announcements
+                        if (announcement.active) {
+                            announcements.push({
+                                id: childSnapshot.key,
+                                ...announcement
+                            });
+                        }
+                    });
+
+                    // Sort by timestamp (newest first)
+                    announcements.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                }
+
+                displayAnnouncementsFeed(announcements);
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                displayAnnouncementsFeed([]);
+            }
+        }
+
+        // Display announcements feed
+        function displayAnnouncementsFeed(announcements) {
+            const feedContainer = document.getElementById('announcementsFeed');
+
+            if (announcements.length === 0) {
+                feedContainer.innerHTML = `
+                    <div class="no-announcements">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No announcements at this time. Check back later for updates!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            feedContainer.innerHTML = announcements.map(announcement => {
+                const priorityClass = `priority-${announcement.priority || 'medium'}`;
+                const dateCreated = new Date(announcement.timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `
+                    <div class="announcement-item ${priorityClass}">
+                        <div class="announcement-badge">
+                            <i class="fas fa-bullhorn"></i>
+                            <span class="priority-label">${(announcement.priority || 'medium').toUpperCase()}</span>
+                        </div>
+                        <div class="announcement-body">
+                            <h3 class="announcement-title">${announcement.title}</h3>
+                            <p class="announcement-content">${announcement.content}</p>
+                            ${announcement.images && announcement.images.length > 0 ? `
+                                <div class="announcement-images-container" id="feed-announcement-images-${announcement.id}"></div>
+                            ` : ''}
+                            <div class="announcement-meta">
+                                <span class="announcement-date">
+                                    <i class="fas fa-calendar"></i>
+                                    ${dateCreated}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Display images for each announcement after HTML is rendered
+            setTimeout(() => {
+                announcements.forEach(announcement => {
+                    if (announcement.images && announcement.images.length > 0) {
+                        const container = document.getElementById(`feed-announcement-images-${announcement.id}`);
+                        if (container && window.displayAnnouncementImages) {
+                            window.displayAnnouncementImages(announcement.images, container);
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // Photo Gallery Functions
+        let currentGalleryFilter = 'all';
+        let galleryPhotos = [];
+
+        // Load photo gallery from Firebase
+        async function loadPhotoGallery() {
+            if (!announcementsDatabase) {
+                console.warn('Firebase not initialized for gallery');
+                return;
+            }
+
+            try {
+                const galleryRef = announcementsDatabase.ref('gallery/photos');
+                const snapshot = await galleryRef.orderByChild('uploadDate').once('value');
+
+                galleryPhotos = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const photo = childSnapshot.val();
+                        if (photo.active) {
+                            galleryPhotos.push({
+                                id: childSnapshot.key,
+                                ...photo
+                            });
+                        }
+                    });
+
+                    // Sort by upload date (newest first)
+                    galleryPhotos.sort((a, b) => (b.uploadDate || 0) - (a.uploadDate || 0));
+                }
+
+                displayGallery();
+                setupGalleryFilters();
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                displayGallery([]);
+            }
+        }
+
+        // Display gallery photos
+        function displayGallery() {
+            const galleryGrid = document.getElementById('galleryGrid');
+
+            // Filter photos based on current filter
+            const filteredPhotos = currentGalleryFilter === 'all'
+                ? galleryPhotos
+                : galleryPhotos.filter(photo => photo.category === currentGalleryFilter);
+
+            if (filteredPhotos.length === 0) {
+                galleryGrid.innerHTML = `
+                    <div class="gallery-empty">
+                        <i class="fas fa-camera"></i>
+                        <h3>No Photos Yet</h3>
+                        <p>Check back soon for photos from our scout activities!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            galleryGrid.innerHTML = filteredPhotos.map(photo => {
+                const uploadDate = new Date(photo.uploadDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `
+                    <div class="gallery-item" data-category="${photo.category}">
+                        <div class="gallery-image-container">
+                            <img src="${photo.githubUrl}" alt="${photo.title}" class="gallery-image" loading="lazy">
+                            <div class="gallery-overlay">
+                                <div class="gallery-info">
+                                    <h4 class="gallery-title">${photo.title}</h4>
+                                    <p class="gallery-description">${photo.description}</p>
+                                    <span class="gallery-date">
+                                        <i class="fas fa-calendar"></i>
+                                        ${uploadDate}
+                                    </span>
+                                </div>
+                                <button class="gallery-expand" onclick="openImageModal('${photo.id}')">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="gallery-category-badge ${photo.category}">
+                            ${getCategoryIcon(photo.category)}
+                            ${getCategoryName(photo.category)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Setup gallery filter buttons
+        function setupGalleryFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    // Update current filter and display
+                    currentGalleryFilter = this.getAttribute('data-category');
+                    displayGallery();
+                });
+            });
+        }
+
+        // Get category icon
+        function getCategoryIcon(category) {
+            const icons = {
+                cubs: '<i class="fas fa-baby"></i>',
+                scouts: '<i class="fas fa-child"></i>',
+                rovers: '<i class="fas fa-user-graduate"></i>',
+                events: '<i class="fas fa-calendar-star"></i>',
+                activities: '<i class="fas fa-anchor"></i>'
+            };
+            return icons[category] || '<i class="fas fa-image"></i>';
+        }
+
+        // Get category display name
+        function getCategoryName(category) {
+            const names = {
+                cubs: 'Cubs & Brownies',
+                scouts: 'Scouts',
+                rovers: 'Rovers',
+                events: 'Events',
+                activities: 'Activities'
+            };
+            return names[category] || 'Gallery';
+        }
+
+        // Open image in modal (basic implementation)
+        function openImageModal(photoId) {
+            const photo = galleryPhotos.find(p => p.id === photoId);
+            if (!photo) return;
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'image-modal';
+            modal.innerHTML = `
+                <div class="modal-backdrop" onclick="closeImageModal()"></div>
+                <div class="modal-content">
+                    <button class="modal-close" onclick="closeImageModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <img src="${photo.githubUrl}" alt="${photo.title}" class="modal-image">
+                    <div class="modal-info">
+                        <h3>${photo.title}</h3>
+                        <p>${photo.description}</p>
+                        <span class="modal-category">${getCategoryName(photo.category)}</span>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close image modal
+        function closeImageModal() {
+            const modal = document.querySelector('.image-modal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="announcement-images.js"></script>
+    <script src="calendar.js"></script>
+</body>
+</html>
