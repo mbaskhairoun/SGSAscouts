@@ -139,6 +139,7 @@ async function loadAdminRSVPs() {
         adminCurrentRSVPs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
         console.log('Loaded admin RSVPs:', adminCurrentRSVPs.length);
+        console.log('RSVP data sample:', adminCurrentRSVPs.slice(0, 2));
         displayAdminRSVPs();
         updateRSVPStats();
         populateRSVPEventFilter();
@@ -229,6 +230,10 @@ function displayAdminEvents() {
                         <i class="fas fa-eye"></i>
                         View RSVPs
                     </button>
+                    <button class="action-btn small primary" onclick="copyEventRSVPLink('${event.id}')">
+                        <i class="fas fa-link"></i>
+                        Copy RSVP Link
+                    </button>
                     <button class="action-btn small danger" onclick="deleteEvent('${event.id}')">
                         <i class="fas fa-trash"></i>
                         Delete
@@ -242,9 +247,13 @@ function displayAdminEvents() {
 // Display RSVPs in admin list
 function displayAdminRSVPs() {
     const rsvpList = document.getElementById('rsvpList');
-    if (!rsvpList) return;
+    if (!rsvpList) {
+        console.error('RSVP list element not found');
+        return;
+    }
 
     const filteredRSVPs = getFilteredRSVPs();
+    console.log('Displaying RSVPs - Total:', adminCurrentRSVPs.length, 'Filtered:', filteredRSVPs.length);
 
     if (filteredRSVPs.length === 0) {
         rsvpList.innerHTML = `
@@ -305,6 +314,87 @@ function displayAdminRSVPs() {
                         <div class="rsvp-notes">
                             <strong>Additional notes:</strong>
                             <p>${rsvp.additionalNotes}</p>
+                        </div>
+                    ` : ''}
+
+                    ${rsvp.campingDetails ? `
+                        <div class="camping-details">
+                            <h5><i class="fas fa-campground"></i> Camping Details</h5>
+
+                            <div class="camping-section">
+                                <strong>Emergency Contact:</strong>
+                                <div class="camping-info">
+                                    ${rsvp.campingDetails.emergencyContact.name} (${rsvp.campingDetails.emergencyContact.relation})<br>
+                                    📞 ${rsvp.campingDetails.emergencyContact.phone}
+                                </div>
+                            </div>
+
+                            ${(rsvp.campingDetails.medical && rsvp.campingDetails.medical.conditions) || (rsvp.campingDetails.medical && rsvp.campingDetails.medical.medications) ? `
+                                <div class="camping-section">
+                                    <strong>Medical Information:</strong>
+                                    <div class="camping-info">
+                                        ${rsvp.campingDetails.medical && rsvp.campingDetails.medical.conditions ? `<div>Conditions: ${rsvp.campingDetails.medical.conditions}</div>` : ''}
+                                        ${rsvp.campingDetails.medical && rsvp.campingDetails.medical.medications ? `<div>Medications: ${rsvp.campingDetails.medical.medications}</div>` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${(rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.restrictions && rsvp.campingDetails.dietary.restrictions.length > 0) || (rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.other) ? `
+                                <div class="camping-section">
+                                    <strong>Dietary Requirements:</strong>
+                                    <div class="camping-info">
+                                        ${rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.restrictions && rsvp.campingDetails.dietary.restrictions.length > 0 ? `<div>Restrictions: ${rsvp.campingDetails.dietary.restrictions.join(', ')}</div>` : ''}
+                                        ${rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.other ? `<div>Other: ${rsvp.campingDetails.dietary.other}</div>` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="camping-section">
+                                <strong>Camping Info:</strong>
+                                <div class="camping-info">
+                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.experience ? `<div>Experience: ${rsvp.campingDetails.camping.experience}</div>` : ''}
+                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.sleepingArrangements ? `<div>Sleeping: ${rsvp.campingDetails.camping.sleepingArrangements.replace('-', ' ')}</div>` : ''}
+                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.availableGear && rsvp.campingDetails.camping.availableGear.length > 0 ? `<div>Gear: ${rsvp.campingDetails.camping.availableGear.join(', ')}</div>` : ''}
+                                </div>
+                            </div>
+
+                            ${rsvp.campingDetails.transportation && rsvp.campingDetails.transportation.method ? `
+                                <div class="camping-section">
+                                    <strong>Transportation:</strong>
+                                    <div class="camping-info">
+                                        ${rsvp.campingDetails.transportation.method.replace('-', ' ')}
+                                        ${rsvp.campingDetails.transportation.carpoolSpaces ? ` (${rsvp.campingDetails.transportation.carpoolSpaces} seats available)` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${rsvp.campingDetails.parentParticipation ? `
+                                <div class="camping-section">
+                                    <strong>Parent Participation:</strong>
+                                    <div class="camping-info">${rsvp.campingDetails.parentParticipation.replace('-', ' ')}</div>
+                                </div>
+                            ` : ''}
+
+                            ${rsvp.campingDetails.specialNeeds ? `
+                                <div class="camping-section">
+                                    <strong>Special Needs:</strong>
+                                    <div class="camping-info">${rsvp.campingDetails.specialNeeds}</div>
+                                </div>
+                            ` : ''}
+
+                            ${rsvp.campingDetails.contactInstructions ? `
+                                <div class="camping-section">
+                                    <strong>Contact Instructions:</strong>
+                                    <div class="camping-info">${rsvp.campingDetails.contactInstructions}</div>
+                                </div>
+                            ` : ''}
+
+                            ${rsvp.campingDetails.permissions && rsvp.campingDetails.permissions.length > 0 ? `
+                                <div class="camping-section">
+                                    <strong>Permissions:</strong>
+                                    <div class="camping-info">${rsvp.campingDetails.permissions.map(p => p.replace('-', ' ')).join(', ')}</div>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
 
@@ -638,11 +728,59 @@ function formatTime(timeStr) {
     return `${displayHour}:${minutes} ${ampm}`;
 }
 
+// Copy RSVP link for an event (admin function)
+function copyEventRSVPLink(eventId) {
+    const event = adminCurrentEvents.find(e => e.id === eventId);
+    if (!event) {
+        alert('Event not found');
+        return;
+    }
+
+    const baseUrl = window.location.origin + window.location.pathname.replace('/admin.html', '/index.html');
+    const params = new URLSearchParams();
+    params.set('rsvp', event.id);
+    params.set('date', event.date);
+
+    const link = `${baseUrl}?${params.toString()}`;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+            showNotification('RSVP link copied to clipboard!', 'success');
+        }).catch(err => {
+            console.error('Failed to copy link:', err);
+            fallbackCopyToClipboard(link);
+        });
+    } else {
+        fallbackCopyToClipboard(link);
+    }
+}
+
+// Fallback copy method for older browsers (admin version)
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+        document.execCommand('copy');
+        showNotification('RSVP link copied to clipboard!', 'success');
+    } catch (err) {
+        console.error('Failed to copy link:', err);
+        showNotification('Failed to copy link. Link: ' + text, 'error');
+    }
+
+    document.body.removeChild(textArea);
+}
+
 // Expose functions to global scope
 window.showAddEventModal = showAddEventModal;
 window.editEvent = editEvent;
 window.viewEventRSVPs = viewEventRSVPs;
 window.deleteEvent = deleteEvent;
+window.copyEventRSVPLink = copyEventRSVPLink;
 window.filterAdminEvents = filterAdminEvents;
 window.filterRSVPs = filterRSVPs;
 

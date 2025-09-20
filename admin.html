@@ -464,6 +464,7 @@
                                 <option value="meeting">Meetings</option>
                                 <option value="event">Events</option>
                                 <option value="special">Special Events</option>
+                                <option value="camping">Camping Trips</option>
                             </select>
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
@@ -1618,6 +1619,7 @@
                             <option value="">Select Type</option>
                             <option value="event">Regular Event</option>
                             <option value="special">Special Event</option>
+                            <option value="camping">Camping Trip</option>
                             <option value="meeting">Meeting (Custom)</option>
                         </select>
                     </div>
@@ -1787,6 +1789,7 @@
                         <select name="type" required>
                             <option value="event">Regular Event</option>
                             <option value="special">Special Event</option>
+                            <option value="camping">Camping Trip</option>
                             <option value="meeting">Meeting (Custom)</option>
                         </select>
                     </div>
@@ -2077,5 +2080,74 @@
     <script src="announcement-images.js"></script>
     <script src="admin-calendar.js"></script>
     <script src="admin-troops.js"></script>
+
+    <!-- Camping Details Styling for Admin -->
+    <style>
+        .camping-details {
+            background-color: #f8fff9;
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .camping-details h5 {
+            color: #27ae60;
+            margin: 0 0 15px 0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .camping-section {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .camping-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .camping-section strong {
+            color: #2c5530;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+        }
+
+        .camping-info {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-left: 10px;
+        }
+
+        .camping-info div {
+            margin-bottom: 2px;
+        }
+
+        .camping-info div:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Make RSVP items with camping details stand out */
+        .rsvp-item:has(.camping-details) {
+            border-left: 4px solid #27ae60;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .camping-details {
+                padding: 10px;
+            }
+
+            .camping-info {
+                margin-left: 5px;
+            }
+        }
+    </style>
 </body>
 </html>

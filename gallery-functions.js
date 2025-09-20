@@ -2,16 +2,21 @@
 // GitHub Configuration - Dynamic token from Firebase
 async function getGalleryGitHubConfig() {
     // Use config from config.js if available, otherwise fall back to defaults
-    if (window.config) {
-        const config = { ...window.config };
+    if (window.GITHUB_CONFIG) {
+        const config = { ...window.GITHUB_CONFIG };
 
         // Fetch token from Firebase if not already set
         if (!config.token && window.githubTokenService) {
             try {
                 config.token = await window.githubTokenService.getToken();
+                if (!config.token) {
+                    console.error('Gallery: No token returned from token service');
+                }
             } catch (error) {
-                console.error('Error fetching token from Firebase:', error);
+                console.error('Gallery: Error fetching token from Firebase:', error);
             }
+        } else if (!config.token) {
+            console.error('Gallery: No token and githubTokenService not available');
         }
 
         return config;
@@ -34,7 +39,21 @@ let galleryConfig = null;
 // Initialize gallery config on page load
 async function initializeGalleryConfig() {
     try {
+        // Wait a bit for GitHub token service to be ready
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+
+        while (!window.githubTokenService && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (!window.githubTokenService) {
+            console.warn('Gallery: GitHub token service not available after waiting');
+        }
+
         galleryConfig = await getGalleryGitHubConfig();
+        console.log('Gallery config initialized successfully');
     } catch (error) {
         console.error('Failed to initialize gallery config:', error);
     }
@@ -42,9 +61,12 @@ async function initializeGalleryConfig() {
 
 // Call initialization when page loads
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeGalleryConfig);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add a small delay to ensure other scripts are loaded
+        setTimeout(initializeGalleryConfig, 500);
+    });
 } else {
-    initializeGalleryConfig();
+    setTimeout(initializeGalleryConfig, 500);
 }
 
 // File to Base64 conversion
@@ -110,6 +132,13 @@ async function ensureDirectoryExists(directory) {
 async function uploadToGitHub(imageFile, filename) {
     try {
         const config = await getGalleryGitHubConfig();
+
+        // Check if we have a valid token
+        if (!config.token) {
+            throw new Error('No GitHub token available. Please check your configuration.');
+        }
+
+        console.log('Gallery upload: Using token starting with:', config.token.substring(0, 8) + '...');
 
         // Extract directory from filename and ensure it exists
         const directory = filename.split('/')[0];

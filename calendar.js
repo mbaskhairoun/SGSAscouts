@@ -43,10 +43,103 @@ function initializeCalendar() {
         // Load upcoming events
         loadUpcomingEvents();
 
+        // Check for direct RSVP link parameters
+        setTimeout(() => {
+            checkForDirectRSVPLink();
+        }, 2000); // Wait for events to load
+
         console.log('Calendar initialized successfully');
     } catch (error) {
         console.error('Error initializing calendar:', error);
     }
+}
+
+// Check for direct RSVP link parameters
+function checkForDirectRSVPLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('rsvp');
+    const eventDate = urlParams.get('date');
+
+    if (eventId || eventDate) {
+        console.log('Direct RSVP link detected:', { eventId, eventDate });
+
+        // Find event by ID first
+        if (eventId) {
+            const event = currentEvents.find(e => e.id === eventId);
+            if (event) {
+                console.log('Found event by ID, opening RSVP modal');
+                openRSVPModal(event);
+                return;
+            }
+        }
+
+        // If no ID or event not found by ID, try to find by date
+        if (eventDate) {
+            const eventsOnDate = currentEvents.filter(e => e.date === eventDate);
+            if (eventsOnDate.length === 1) {
+                console.log('Found single event on date, opening RSVP modal');
+                openRSVPModal(eventsOnDate[0]);
+                return;
+            } else if (eventsOnDate.length > 1) {
+                console.log('Multiple events on date, showing day events');
+                showDayEvents(eventDate, eventsOnDate);
+                return;
+            }
+        }
+
+        console.log('No matching event found for direct link parameters');
+    }
+}
+
+// Generate direct RSVP link for an event
+function generateRSVPLink(event) {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams();
+
+    if (event.id) {
+        params.set('rsvp', event.id);
+    }
+    if (event.date) {
+        params.set('date', event.date);
+    }
+
+    return `${baseUrl}?${params.toString()}`;
+}
+
+// Copy RSVP link to clipboard
+function copyRSVPLink(event) {
+    const link = generateRSVPLink(event);
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+            alert('RSVP link copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy link:', err);
+            fallbackCopyToClipboard(link);
+        });
+    } else {
+        fallbackCopyToClipboard(link);
+    }
+}
+
+// Fallback copy method for older browsers
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+        document.execCommand('copy');
+        alert('RSVP link copied to clipboard!');
+    } catch (err) {
+        console.error('Failed to copy link:', err);
+        alert('Failed to copy link. Please copy manually: ' + text);
+    }
+
+    document.body.removeChild(textArea);
 }
 
 // Setup calendar navigation buttons
@@ -56,13 +149,19 @@ function setupCalendarNavigation() {
 
     if (prevBtn && nextBtn) {
         prevBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
+            // Safer month navigation - set to first day to avoid day overflow issues
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            currentDate = new Date(year, month - 1, 1);
             generateCalendar();
             loadUpcomingEvents();
         });
 
         nextBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
+            // Safer month navigation - set to first day to avoid day overflow issues
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            currentDate = new Date(year, month + 1, 1);
             generateCalendar();
             loadUpcomingEvents();
         });
@@ -330,18 +429,47 @@ function setupRSVPForm() {
     const rsvpForm = document.getElementById('rsvpForm');
     const attendanceRadios = document.querySelectorAll('input[name="attendanceStatus"]');
     const reasonGroup = document.getElementById('reasonGroup');
+    const campingFields = document.getElementById('campingFields');
+    const transportationRadios = document.querySelectorAll('input[name="transportation"]');
+    const carpoolDetails = document.getElementById('carpoolDetails');
 
     if (rsvpForm) {
         rsvpForm.addEventListener('submit', handleRSVPSubmission);
     }
 
+    // Handle attendance status changes
     if (attendanceRadios && reasonGroup) {
         attendanceRadios.forEach(radio => {
             radio.addEventListener('change', () => {
                 if (radio.value === 'not-attending' && radio.checked) {
                     reasonGroup.style.display = 'block';
-                } else {
+                    if (campingFields) campingFields.style.display = 'none';
+                } else if (radio.value === 'attending' && radio.checked) {
                     reasonGroup.style.display = 'none';
+                    // Show camping fields only if this is a camping event
+                    if (campingFields && selectedEvent && selectedEvent.type === 'camping') {
+                        campingFields.style.display = 'block';
+                        campingFields.style.visibility = 'visible';
+                        campingFields.style.opacity = '1';
+                    }
+                    // Clear any permissions validation error
+                    const permissionsError = document.getElementById('permissionsError');
+                    if (permissionsError) {
+                        permissionsError.style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+
+    // Handle transportation selection for carpool details
+    if (transportationRadios && carpoolDetails) {
+        transportationRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'can-carpool' && radio.checked) {
+                    carpoolDetails.style.display = 'block';
+                } else {
+                    carpoolDetails.style.display = 'none';
                 }
             });
         });
@@ -427,6 +555,22 @@ function openRSVPModal(eventIdOrObject) {
     document.getElementById('rsvpForm').reset();
     document.getElementById('reasonGroup').style.display = 'none';
 
+    // Handle camping fields visibility
+    const campingFields = document.getElementById('campingFields');
+    const carpoolDetails = document.getElementById('carpoolDetails');
+
+    if (campingFields) {
+        if (event.type === 'camping') {
+            campingFields.style.display = 'none'; // Will show when they select attending
+        } else {
+            campingFields.style.display = 'none';
+        }
+    }
+
+    if (carpoolDetails) {
+        carpoolDetails.style.display = 'none';
+    }
+
     // Reset scout selection
     const scoutNameSelect = document.getElementById('childName');
     if (scoutNameSelect) {
@@ -464,6 +608,27 @@ async function handleRSVPSubmission(e) {
     }
 
     const formData = new FormData(e.target);
+
+    // Helper function to get all values from checkboxes with the same name
+    function getCheckboxValues(name) {
+        const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Custom validation for camping events
+    if (selectedEvent.type === 'camping' && formData.get('attendanceStatus') === 'attending') {
+        const permissions = getCheckboxValues('permissions');
+        const permissionsError = document.getElementById('permissionsError');
+
+        if (permissions.length === 0) {
+            permissionsError.style.display = 'block';
+            permissionsError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        } else {
+            permissionsError.style.display = 'none';
+        }
+    }
+
     // Combine first and last name
     const firstName = formData.get('scoutFirstName') || '';
     const lastName = formData.get('scoutLastName') || '';
@@ -473,6 +638,7 @@ async function handleRSVPSubmission(e) {
         eventId: selectedEvent.id,
         eventTitle: selectedEvent.title,
         eventDate: selectedEvent.date,
+        eventType: selectedEvent.type || 'meeting',
         parentName: formData.get('parentName'),
         parentEmail: formData.get('parentEmail'),
         childName: fullName,
@@ -485,6 +651,38 @@ async function handleRSVPSubmission(e) {
         timestamp: Date.now(),
         submittedAt: new Date().toISOString()
     };
+
+    // Add camping-specific fields if this is a camping event and they're attending
+    if (selectedEvent.type === 'camping' && formData.get('attendanceStatus') === 'attending') {
+        rsvpData.campingDetails = {
+            emergencyContact: {
+                name: formData.get('emergencyContactName') || '',
+                phone: formData.get('emergencyContactPhone') || '',
+                relation: formData.get('emergencyContactRelation') || ''
+            },
+            medical: {
+                conditions: formData.get('medicalConditions') || '',
+                medications: formData.get('medications') || ''
+            },
+            dietary: {
+                restrictions: getCheckboxValues('dietaryRestrictions'),
+                other: formData.get('otherDietary') || ''
+            },
+            camping: {
+                experience: formData.get('campingExperience') || '',
+                sleepingArrangements: formData.get('sleepingArrangements') || '',
+                availableGear: getCheckboxValues('availableGear')
+            },
+            transportation: {
+                method: formData.get('transportation') || '',
+                carpoolSpaces: formData.get('carpoolSpaces') || ''
+            },
+            specialNeeds: formData.get('specialNeeds') || '',
+            parentParticipation: formData.get('parentParticipation') || '',
+            contactInstructions: formData.get('contactInstructions') || '',
+            permissions: getCheckboxValues('permissions')
+        };
+    }
 
     try {
         // Show loading state
