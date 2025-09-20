@@ -412,6 +412,43 @@ body {
     font-size: 1rem;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.section-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.download-report-btn {
+    background: #2c5aa0;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.download-report-btn:hover {
+    background: #1e3d6f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(44, 90, 160, 0.3);
+}
+
+.download-report-btn i {
+    font-size: 1rem;
+}
+
 .admin-info {
     display: flex;
     align-items: center;
@@ -4525,13 +4562,21 @@ body {
 
 .event-card-actions {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 10px;
 }
 
 .action-btn.small {
-    padding: 6px 12px;
-    font-size: 0.8rem;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    min-width: auto;
+    flex: 0 0 auto;
+}
+
+.action-btn.small i {
+    font-size: 0.7rem;
 }
 
 /* RSVP List */
@@ -4765,6 +4810,12 @@ body {
     .event-card-actions {
         justify-content: center;
         flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .action-btn.small {
+        padding: 4px 6px;
+        font-size: 0.7rem;
     }
 }
 

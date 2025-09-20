@@ -166,6 +166,12 @@ function setupEventListeners() {
         addAnnouncementForm.addEventListener('submit', handleAddAnnouncement);
     }
 
+    // Download RSVP Report button
+    const downloadRSVPButton = document.getElementById('downloadRSVPReport');
+    if (downloadRSVPButton) {
+        downloadRSVPButton.addEventListener('click', downloadRSVPReport);
+    }
+
     const editAnnouncementForm = document.getElementById('editAnnouncementForm');
     if (editAnnouncementForm) {
         editAnnouncementForm.addEventListener('submit', handleEditAnnouncement);
@@ -3091,5 +3097,112 @@ function closeMobileMenu() {
         mobileToggle.classList.remove('active');
         sidebar.classList.remove('open');
         document.body.style.overflow = '';
+    }
+}
+
+// Download RSVP Report Function
+async function downloadRSVPReport() {
+    try {
+        const button = document.getElementById('downloadRSVPReport');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        button.disabled = true;
+
+        // Get all events and RSVPs
+        const eventsSnapshot = await database.ref('calendar/events').once('value');
+        const rsvpsSnapshot = await database.ref('calendar/rsvps').once('value');
+
+        const events = eventsSnapshot.val() || {};
+        const rsvps = rsvpsSnapshot.val() || {};
+
+        // Prepare CSV data
+        let csvContent = "Event Title,Event Date,Event Type,Scout Name,RSVP Status,Contact Name,Contact Phone,Emergency Contact,Emergency Phone";
+
+        // Add camping-specific headers
+        csvContent += ",Medical Conditions,Medications,Dietary Restrictions,Camping Experience,Sleeping Arrangement,Available Gear,Transportation,Parent Participation,Special Needs,Permissions\n";
+
+        let rowCount = 0;
+
+        // Process RSVPs
+        Object.keys(rsvps).forEach(rsvpKey => {
+            const rsvp = rsvps[rsvpKey];
+            const event = events[rsvp.eventId];
+
+            if (!event || !rsvp) return;
+
+            rowCount++;
+
+            // Basic info
+            const eventTitle = (event.title || '').replace(/"/g, '""');
+            const eventDate = rsvp.eventDate || event.date || '';
+            const eventType = event.type || '';
+            const scoutName = (rsvp.scoutName || '').replace(/"/g, '""');
+            const status = rsvp.attendanceStatus || rsvp.status || '';
+            const contactName = (rsvp.contactName || '').replace(/"/g, '""');
+            const contactPhone = (rsvp.contactPhone || '').replace(/"/g, '""');
+
+            // Emergency contact
+            const emergencyContact = rsvp.campingDetails?.emergencyContact?.name ? (rsvp.campingDetails.emergencyContact.name || '').replace(/"/g, '""') : '';
+            const emergencyPhone = rsvp.campingDetails?.emergencyContact?.phone || '';
+
+            // Medical info
+            const medicalConditions = rsvp.campingDetails?.medical?.conditions ? (rsvp.campingDetails.medical.conditions || '').replace(/"/g, '""') : '';
+            const medications = rsvp.campingDetails?.medical?.medications ? (rsvp.campingDetails.medical.medications || '').replace(/"/g, '""') : '';
+
+            // Dietary
+            const dietaryRestrictions = rsvp.campingDetails?.dietary?.restrictions?.length > 0 ?
+                rsvp.campingDetails.dietary.restrictions.join('; ').replace(/"/g, '""') : '';
+
+            // Camping details
+            const campingExperience = rsvp.campingDetails?.camping?.experience || '';
+            const sleepingArrangement = rsvp.campingDetails?.camping?.sleepingArrangements || '';
+            const availableGear = rsvp.campingDetails?.camping?.availableGear?.length > 0 ?
+                rsvp.campingDetails.camping.availableGear.join('; ').replace(/"/g, '""') : '';
+
+            // Transportation
+            const transportation = rsvp.campingDetails?.transportation?.method || '';
+
+            // Other details
+            const parentParticipation = rsvp.campingDetails?.parentParticipation || '';
+            const specialNeeds = rsvp.campingDetails?.specialNeeds ? (rsvp.campingDetails.specialNeeds || '').replace(/"/g, '""') : '';
+            const permissions = rsvp.campingDetails?.permissions?.length > 0 ?
+                rsvp.campingDetails.permissions.join('; ').replace(/"/g, '""') : '';
+
+            // Add row to CSV
+            csvContent += `"${eventTitle}","${eventDate}","${eventType}","${scoutName}","${status}","${contactName}","${contactPhone}","${emergencyContact}","${emergencyPhone}","${medicalConditions}","${medications}","${dietaryRestrictions}","${campingExperience}","${sleepingArrangement}","${availableGear}","${transportation}","${parentParticipation}","${specialNeeds}","${permissions}"\n`;
+        });
+
+        if (rowCount === 0) {
+            alert('No RSVP data found. Make sure there are events with RSVPs in the database.');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            return;
+        }
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `SGSA_RSVP_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+
+    } catch (error) {
+        console.error('Error downloading RSVP report:', error);
+        alert('Error generating report. Please try again.');
+
+        // Reset button
+        const button = document.getElementById('downloadRSVPReport');
+        button.innerHTML = '<i class="fas fa-download"></i> Download RSVP Report';
+        button.disabled = false;
     }
 }
