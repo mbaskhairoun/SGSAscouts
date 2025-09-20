@@ -30,7 +30,7 @@ jobs:
 
     - name: Replace token in config
       run: |
-        sed -i "s/ghp_[a-zA-Z0-9_]*/${{ secrets.IMAGE_UPLOAD_TOKEN }}/g" config.js
+        sed -i "s/token: '[^']*'/token: '${{ secrets.IMAGE_UPLOAD_TOKEN }}'/g" config.js
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
