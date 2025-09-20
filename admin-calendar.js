@@ -3,6 +3,19 @@ let adminCalendarDatabase;
 let adminCurrentEvents = [];
 let adminCurrentRSVPs = [];
 
+// Utility functions to handle dates correctly and avoid timezone issues
+function parseLocalDate(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+}
+
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Initialize admin calendar functionality
 function initializeAdminCalendar() {
     try {
@@ -93,7 +106,7 @@ async function loadAdminEvents() {
         }
 
         // Sort by date
-        adminCurrentEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+        adminCurrentEvents.sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
 
         console.log('Loaded admin events:', adminCurrentEvents.length);
         displayAdminEvents();
@@ -153,7 +166,7 @@ function displayAdminEvents() {
     }
 
     eventsGrid.innerHTML = filteredEvents.map(event => {
-        const eventDate = new Date(event.date);
+        const eventDate = parseLocalDate(event.date);
         const dateStr = eventDate.toLocaleDateString('en-US', {
             weekday: 'short',
             month: 'short',
@@ -365,7 +378,7 @@ function getFilteredRSVPs() {
 function updateEventStats() {
     const totalEvents = adminCurrentEvents.length;
     const today = new Date();
-    const upcomingEvents = adminCurrentEvents.filter(event => new Date(event.date) >= today).length;
+    const upcomingEvents = adminCurrentEvents.filter(event => parseLocalDate(event.date) >= today).length;
 
     const totalEventsElement = document.getElementById('totalEventsCount');
     const upcomingEventsElement = document.getElementById('upcomingEventsCount');
@@ -405,7 +418,7 @@ function populateRSVPEventFilter() {
     eventsWithRSVPs.forEach(event => {
         const option = document.createElement('option');
         option.value = event.id;
-        option.textContent = `${event.title} (${new Date(event.date).toLocaleDateString()})`;
+        option.textContent = `${event.title} (${parseLocalDate(event.date).toLocaleDateString()})`;
         eventFilter.appendChild(option);
     });
 }
@@ -786,11 +799,17 @@ async function processRecurringEvent(formData) {
 async function createSingleEvent(formData) {
     const eventId = 'event-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
+    // Fix timezone issue by ensuring date is treated as local date
+    const dateInput = formData.get('date');
+
+    // Parse and re-format the date to ensure it's handled correctly
+    const correctedDate = formatLocalDate(parseLocalDate(dateInput));
+
     const eventData = {
         id: eventId,
         title: formData.get('title'),
         type: formData.get('type'),
-        date: formData.get('date'),
+        date: correctedDate,
         startTime: formData.get('startTime') || null,
         endTime: formData.get('endTime') || null,
         description: formData.get('description') || '',
