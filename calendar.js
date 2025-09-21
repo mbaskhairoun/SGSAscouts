@@ -255,11 +255,18 @@ function getEventsForDate(date) {
     return events;
 }
 
-// Generate event dots for calendar day
+// Generate event displays for calendar day
 function generateDayEvents(events) {
     return events.slice(0, 3).map(event => {
         const eventClass = event.type || 'event';
-        return `<div class="event-dot ${eventClass}" title="${event.title}"></div>`;
+        const eventTitle = event.title || 'Event';
+        // Truncate long titles for display
+        const displayTitle = eventTitle.length > 20 ? eventTitle.substring(0, 17) + '...' : eventTitle;
+
+        return `<div class="event-item ${eventClass}" title="${eventTitle}">
+            <div class="event-bar"></div>
+            <div class="event-title">${displayTitle}</div>
+        </div>`;
     }).join('');
 }
 
