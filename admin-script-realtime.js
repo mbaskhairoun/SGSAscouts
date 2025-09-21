@@ -3116,7 +3116,7 @@ async function downloadRSVPReport() {
         const rsvps = rsvpsSnapshot.val() || {};
 
         // Prepare CSV data
-        let csvContent = "Event Title,Event Date,Event Type,Scout Name,RSVP Status,Contact Name,Contact Phone,Emergency Contact,Emergency Phone,OHIP Number,Payment Acknowledged,Payment Received,Payment Date,Recorded By\n";
+        let csvContent = "Event Title,Event Date,Event Type,Scout Name,RSVP Status,Contact Name,Contact Email,Emergency Contact,Emergency Phone,OHIP Number,Payment Acknowledged,Payment Received,Payment Date,Recorded By\n";
 
         let rowCount = 0;
 
@@ -3133,10 +3133,10 @@ async function downloadRSVPReport() {
             const eventTitle = (event.title || '').replace(/"/g, '""');
             const eventDate = rsvp.eventDate || event.date || '';
             const eventType = event.type || '';
-            const scoutName = (rsvp.scoutName || '').replace(/"/g, '""');
+            const scoutName = (rsvp.childName || rsvp.scoutName || '').replace(/"/g, '""');
             const status = rsvp.attendanceStatus || rsvp.status || '';
-            const contactName = (rsvp.contactName || '').replace(/"/g, '""');
-            const contactPhone = (rsvp.contactPhone || '').replace(/"/g, '""');
+            const contactName = (rsvp.parentName || rsvp.contactName || '').replace(/"/g, '""');
+            const contactEmail = (rsvp.parentEmail || rsvp.contactEmail || '').replace(/"/g, '""');
 
             // Emergency contact
             const emergencyContact = rsvp.campingDetails?.emergencyContact?.name ? (rsvp.campingDetails.emergencyContact.name || '').replace(/"/g, '""') : '';
@@ -3151,7 +3151,7 @@ async function downloadRSVPReport() {
             const recordedBy = (rsvp.campingDetails?.paymentReceivedBy || '').replace(/"/g, '""');
 
             // Add row to CSV
-            csvContent += `"${eventTitle}","${eventDate}","${eventType}","${scoutName}","${status}","${contactName}","${contactPhone}","${emergencyContact}","${emergencyPhone}","${ohipNumber}","${paymentAcknowledged}","${paymentReceived}","${paymentDate}","${recordedBy}"\n`;
+            csvContent += `"${eventTitle}","${eventDate}","${eventType}","${scoutName}","${status}","${contactName}","${contactEmail}","${emergencyContact}","${emergencyPhone}","${ohipNumber}","${paymentAcknowledged}","${paymentReceived}","${paymentDate}","${recordedBy}"\n`;
         });
 
         if (rowCount === 0) {
