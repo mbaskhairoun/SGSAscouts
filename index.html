@@ -550,17 +550,17 @@
                         <!-- Emergency Contact -->
                         <div class="form-group">
                             <label for="emergencyContactName">Emergency Contact Name *</label>
-                            <input type="text" id="emergencyContactName" name="emergencyContactName" placeholder="Full name of emergency contact">
+                            <input type="text" id="emergencyContactName" name="emergencyContactName" placeholder="Full name of emergency contact" required>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="emergencyContactPhone">Emergency Phone *</label>
-                                <input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" placeholder="(xxx) xxx-xxxx">
+                                <input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" placeholder="(xxx) xxx-xxxx" required>
                             </div>
                             <div class="form-group">
                                 <label for="emergencyContactRelation">Relationship *</label>
-                                <select id="emergencyContactRelation" name="emergencyContactRelation">
+                                <select id="emergencyContactRelation" name="emergencyContactRelation" required>
                                     <option value="">Select relationship</option>
                                     <option value="parent">Parent</option>
                                     <option value="guardian">Guardian</option>
@@ -573,228 +573,23 @@
                             </div>
                         </div>
 
-                        <!-- Medical Information -->
+                        <!-- OHIP Number -->
                         <div class="form-group">
-                            <label for="medicalConditions">Medical Conditions/Allergies</label>
-                            <textarea id="medicalConditions" name="medicalConditions" rows="3" placeholder="List any medical conditions, allergies, medications, or dietary restrictions we should know about"></textarea>
+                            <label for="ohipNumber">OHIP Number *</label>
+                            <input type="text" id="ohipNumber" name="ohipNumber" placeholder="xxxx-xxx-xxx" maxlength="12" pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}" required>
+                            <small>Format: 1234-567-890 (required for camp participation)</small>
                         </div>
 
+                        <!-- Payment Acknowledgment -->
                         <div class="form-group">
-                            <label for="medications">Current Medications</label>
-                            <textarea id="medications" name="medications" rows="2" placeholder="List any medications your scout takes (include dosage and timing)"></textarea>
-                        </div>
-
-                        <!-- Dietary Requirements -->
-                        <div class="form-group">
-                            <label>Dietary Requirements</label>
-                            <div class="checkbox-group">
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="vegetarian">
-                                    <span class="checkbox-custom"></span>
-                                    Vegetarian
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="vegan">
-                                    <span class="checkbox-custom"></span>
-                                    Vegan
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="gluten-free">
-                                    <span class="checkbox-custom"></span>
-                                    Gluten-Free
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="dairy-free">
-                                    <span class="checkbox-custom"></span>
-                                    Dairy-Free
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="nut-allergy">
-                                    <span class="checkbox-custom"></span>
-                                    Nut Allergy
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="dietaryRestrictions" value="other">
-                                    <span class="checkbox-custom"></span>
-                                    Other (specify below)
-                                </label>
-                            </div>
-                            <input type="text" id="otherDietary" name="otherDietary" placeholder="Please specify other dietary restrictions" style="margin-top: 10px;">
-                        </div>
-
-                        <!-- Camping Experience & Preferences -->
-                        <div class="form-group">
-                            <label for="campingExperience">Camping Experience Level</label>
-                            <select id="campingExperience" name="campingExperience">
-                                <option value="">Select experience level</option>
-                                <option value="first-time">First-time camper</option>
-                                <option value="beginner">Beginner (1-2 times)</option>
-                                <option value="intermediate">Intermediate (3-5 times)</option>
-                                <option value="experienced">Experienced (6+ times)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="sleepingArrangements">Sleeping Arrangements</label>
-                            <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="sleepingArrangements" value="own-tent">
-                                    <span class="radio-custom"></span>
-                                    Bringing own tent
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="sleepingArrangements" value="share-tent">
-                                    <span class="radio-custom"></span>
-                                    Willing to share tent
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="sleepingArrangements" value="need-tent">
-                                    <span class="radio-custom"></span>
-                                    Need tent provided
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="sleepingArrangements" value="cabin-preference">
-                                    <span class="radio-custom"></span>
-                                    Prefer cabin if available
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Equipment & Gear -->
-                        <div class="form-group">
-                            <label>Camping Gear Available</label>
-                            <div class="checkbox-group">
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="tent">
-                                    <span class="checkbox-custom"></span>
-                                    Tent
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="sleeping-bag">
-                                    <span class="checkbox-custom"></span>
-                                    Sleeping bag
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="pillow">
-                                    <span class="checkbox-custom"></span>
-                                    Pillow/sleeping pad
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="flashlight">
-                                    <span class="checkbox-custom"></span>
-                                    Flashlight/lantern
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="rain-gear">
-                                    <span class="checkbox-custom"></span>
-                                    Rain gear
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="availableGear" value="warm-clothes">
-                                    <span class="checkbox-custom"></span>
-                                    Warm clothes
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Transportation -->
-                        <div class="form-group">
-                            <label for="transportation">Transportation</label>
-                            <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="transportation" value="driving-self">
-                                    <span class="radio-custom"></span>
-                                    Driving to campsite myself
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="transportation" value="need-ride">
-                                    <span class="radio-custom"></span>
-                                    Need transportation
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="transportation" value="can-carpool">
-                                    <span class="radio-custom"></span>
-                                    Can offer carpool space
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="carpoolDetails" style="display: none;">
-                            <label for="carpoolSpaces">Number of additional seats available</label>
-                            <select id="carpoolSpaces" name="carpoolSpaces">
-                                <option value="">Select</option>
-                                <option value="1">1 seat</option>
-                                <option value="2">2 seats</option>
-                                <option value="3">3 seats</option>
-                                <option value="4">4+ seats</option>
-                            </select>
-                        </div>
-
-                        <!-- Special Considerations -->
-                        <div class="form-group">
-                            <label for="specialNeeds">Special Accommodations Needed</label>
-                            <textarea id="specialNeeds" name="specialNeeds" rows="3" placeholder="Any special accommodations, accessibility needs, or other considerations for this camping trip"></textarea>
-                        </div>
-
-                        <!-- Parent/Guardian Participation -->
-                        <div class="form-group">
-                            <label for="parentParticipation">Parent/Guardian Participation</label>
-                            <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="parentParticipation" value="staying-full">
-                                    <span class="radio-custom"></span>
-                                    Staying for full camping trip
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="parentParticipation" value="day-visit">
-                                    <span class="radio-custom"></span>
-                                    Day visit only
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="parentParticipation" value="drop-off">
-                                    <span class="radio-custom"></span>
-                                    Drop-off only
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="parentParticipation" value="help-needed">
-                                    <span class="radio-custom"></span>
-                                    Available to help if needed
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Contact During Trip -->
-                        <div class="form-group">
-                            <label for="contactInstructions">Contact Instructions</label>
-                            <textarea id="contactInstructions" name="contactInstructions" rows="2" placeholder="Best way to reach you during the camping trip (cell phone, text, etc.)"></textarea>
-                        </div>
-
-                        <!-- Permissions -->
-                        <div class="form-group">
-                            <label>Permissions *</label>
-                            <div class="checkbox-group">
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="permissions" value="swimming">
-                                    <span class="checkbox-custom"></span>
-                                    Permission for swimming activities (if available)
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="permissions" value="hiking">
-                                    <span class="checkbox-custom"></span>
-                                    Permission for hiking/nature walks
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="permissions" value="photos">
-                                    <span class="checkbox-custom"></span>
-                                    Permission to include scout in group photos
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="permissions" value="emergency-treatment">
-                                    <span class="checkbox-custom"></span>
-                                    Permission for emergency medical treatment if parents cannot be reached
-                                </label>
-                            </div>
-                            <small style="color: #e74c3c; display: none;" id="permissionsError">Please select at least one permission for camping activities.</small>
+                            <label class="checkbox-label payment-acknowledgment">
+                                <input type="checkbox" id="paymentAcknowledgment" name="paymentAcknowledgment" required>
+                                <span class="checkbox-custom"></span>
+                                <span class="payment-text">
+                                    I acknowledge that the camping trip fee is <strong>$30</strong> and agree to send an e-transfer to <strong>raymonda@gmail.com</strong> to complete registration.
+                                </span>
+                            </label>
+                            <small style="color: #e74c3c; display: none;" id="paymentError">You must acknowledge the payment requirement to register for the camping trip.</small>
                         </div>
                     </div>
 

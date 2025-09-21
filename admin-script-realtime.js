@@ -3116,10 +3116,7 @@ async function downloadRSVPReport() {
         const rsvps = rsvpsSnapshot.val() || {};
 
         // Prepare CSV data
-        let csvContent = "Event Title,Event Date,Event Type,Scout Name,RSVP Status,Contact Name,Contact Phone,Emergency Contact,Emergency Phone";
-
-        // Add camping-specific headers
-        csvContent += ",Medical Conditions,Medications,Dietary Restrictions,Camping Experience,Sleeping Arrangement,Available Gear,Transportation,Parent Participation,Special Needs,Permissions\n";
+        let csvContent = "Event Title,Event Date,Event Type,Scout Name,RSVP Status,Contact Name,Contact Phone,Emergency Contact,Emergency Phone,OHIP Number,Payment Acknowledged,Payment Received,Payment Date,Recorded By\n";
 
         let rowCount = 0;
 
@@ -3145,31 +3142,16 @@ async function downloadRSVPReport() {
             const emergencyContact = rsvp.campingDetails?.emergencyContact?.name ? (rsvp.campingDetails.emergencyContact.name || '').replace(/"/g, '""') : '';
             const emergencyPhone = rsvp.campingDetails?.emergencyContact?.phone || '';
 
-            // Medical info
-            const medicalConditions = rsvp.campingDetails?.medical?.conditions ? (rsvp.campingDetails.medical.conditions || '').replace(/"/g, '""') : '';
-            const medications = rsvp.campingDetails?.medical?.medications ? (rsvp.campingDetails.medical.medications || '').replace(/"/g, '""') : '';
-
-            // Dietary
-            const dietaryRestrictions = rsvp.campingDetails?.dietary?.restrictions?.length > 0 ?
-                rsvp.campingDetails.dietary.restrictions.join('; ').replace(/"/g, '""') : '';
-
-            // Camping details
-            const campingExperience = rsvp.campingDetails?.camping?.experience || '';
-            const sleepingArrangement = rsvp.campingDetails?.camping?.sleepingArrangements || '';
-            const availableGear = rsvp.campingDetails?.camping?.availableGear?.length > 0 ?
-                rsvp.campingDetails.camping.availableGear.join('; ').replace(/"/g, '""') : '';
-
-            // Transportation
-            const transportation = rsvp.campingDetails?.transportation?.method || '';
-
-            // Other details
-            const parentParticipation = rsvp.campingDetails?.parentParticipation || '';
-            const specialNeeds = rsvp.campingDetails?.specialNeeds ? (rsvp.campingDetails.specialNeeds || '').replace(/"/g, '""') : '';
-            const permissions = rsvp.campingDetails?.permissions?.length > 0 ?
-                rsvp.campingDetails.permissions.join('; ').replace(/"/g, '""') : '';
+            // New simplified camping fields
+            const ohipNumber = rsvp.campingDetails?.ohipNumber || '';
+            const paymentAcknowledged = rsvp.campingDetails?.paymentAcknowledged ? 'Yes' : 'No';
+            const paymentReceived = rsvp.campingDetails?.paymentReceived ? 'Yes' : 'No';
+            const paymentDate = rsvp.campingDetails?.paymentReceivedDate ?
+                new Date(rsvp.campingDetails.paymentReceivedDate).toLocaleDateString() : '';
+            const recordedBy = (rsvp.campingDetails?.paymentReceivedBy || '').replace(/"/g, '""');
 
             // Add row to CSV
-            csvContent += `"${eventTitle}","${eventDate}","${eventType}","${scoutName}","${status}","${contactName}","${contactPhone}","${emergencyContact}","${emergencyPhone}","${medicalConditions}","${medications}","${dietaryRestrictions}","${campingExperience}","${sleepingArrangement}","${availableGear}","${transportation}","${parentParticipation}","${specialNeeds}","${permissions}"\n`;
+            csvContent += `"${eventTitle}","${eventDate}","${eventType}","${scoutName}","${status}","${contactName}","${contactPhone}","${emergencyContact}","${emergencyPhone}","${ohipNumber}","${paymentAcknowledged}","${paymentReceived}","${paymentDate}","${recordedBy}"\n`;
         });
 
         if (rowCount === 0) {

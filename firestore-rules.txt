@@ -18,7 +18,8 @@ service cloud.firestore {
                'admin@sgsascouts.com',           // Replace with your admin email
                'leader@sgsascouts.com',          // Add more admin emails as needed
                'coordinator@sgsascouts.com',
-               'mbaskhairoun@gmail.com'      // You can add multiple admins
+               'mbaskhairoun@gmail.com',
+               'tamerthomas5@gmail.com'      // You can add multiple admins
              ];
     }
     

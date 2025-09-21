@@ -491,6 +491,29 @@ function setupRSVPForm() {
             });
         });
     }
+
+    // Add OHIP number formatting
+    const ohipInput = document.getElementById('ohipNumber');
+    if (ohipInput) {
+        ohipInput.addEventListener('input', (e) => {
+            // Remove all non-digits
+            let value = e.target.value.replace(/\D/g, '');
+
+            // Limit to 10 digits
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+
+            // Format as xxxx-xxx-xxx
+            if (value.length >= 7) {
+                value = value.replace(/(\d{4})(\d{3})(\d{0,3})/, '$1-$2-$3');
+            } else if (value.length >= 4) {
+                value = value.replace(/(\d{4})(\d{0,3})/, '$1-$2');
+            }
+
+            e.target.value = value;
+        });
+    }
 }
 
 
@@ -617,15 +640,27 @@ async function handleRSVPSubmission(e) {
 
     // Custom validation for camping events
     if (selectedEvent.type === 'camping' && formData.get('attendanceStatus') === 'attending') {
-        const permissions = getCheckboxValues('permissions');
-        const permissionsError = document.getElementById('permissionsError');
-
-        if (permissions.length === 0) {
-            permissionsError.style.display = 'block';
-            permissionsError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Validate OHIP number
+        const ohipNumber = formData.get('ohipNumber');
+        const ohipInput = document.getElementById('ohipNumber');
+        if (!ohipNumber || !/^\d{4}-\d{3}-\d{3}$/.test(ohipNumber)) {
+            ohipInput.style.borderColor = '#e74c3c';
+            ohipInput.focus();
+            alert('Please enter a valid OHIP number in the format xxxx-xxx-xxx');
             return;
         } else {
-            permissionsError.style.display = 'none';
+            ohipInput.style.borderColor = '';
+        }
+
+        // Validate payment acknowledgment
+        const paymentAcknowledged = formData.get('paymentAcknowledgment');
+        const paymentError = document.getElementById('paymentError');
+        if (!paymentAcknowledged) {
+            paymentError.style.display = 'block';
+            paymentError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        } else {
+            paymentError.style.display = 'none';
         }
     }
 
@@ -660,27 +695,8 @@ async function handleRSVPSubmission(e) {
                 phone: formData.get('emergencyContactPhone') || '',
                 relation: formData.get('emergencyContactRelation') || ''
             },
-            medical: {
-                conditions: formData.get('medicalConditions') || '',
-                medications: formData.get('medications') || ''
-            },
-            dietary: {
-                restrictions: getCheckboxValues('dietaryRestrictions'),
-                other: formData.get('otherDietary') || ''
-            },
-            camping: {
-                experience: formData.get('campingExperience') || '',
-                sleepingArrangements: formData.get('sleepingArrangements') || '',
-                availableGear: getCheckboxValues('availableGear')
-            },
-            transportation: {
-                method: formData.get('transportation') || '',
-                carpoolSpaces: formData.get('carpoolSpaces') || ''
-            },
-            specialNeeds: formData.get('specialNeeds') || '',
-            parentParticipation: formData.get('parentParticipation') || '',
-            contactInstructions: formData.get('contactInstructions') || '',
-            permissions: getCheckboxValues('permissions')
+            ohipNumber: formData.get('ohipNumber') || '',
+            paymentAcknowledged: formData.get('paymentAcknowledgment') === 'on'
         };
     }
 

@@ -18,7 +18,8 @@ service cloud.firestore {
                'admin@sgsascouts.com',
                'leader@sgsascouts.com', 
                'coordinator@sgsascouts.com',
-               'mbaskhairoun@gmail.com'
+               'mbaskhairoun@gmail.com',
+               'tamerthomas5@gmail.com'
              ];
     }
     

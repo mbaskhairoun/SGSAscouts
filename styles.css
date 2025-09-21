@@ -3172,3 +3172,56 @@ html {
         min-height: 48px;
     }
 }
+
+/* Payment Acknowledgment Styles */
+.payment-acknowledgment {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.payment-acknowledgment:hover {
+    border-color: #0ea5e9;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+}
+
+.payment-acknowledgment input[type="checkbox"] {
+    margin: 0;
+    position: relative;
+    top: 2px;
+}
+
+.payment-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #2c3e50;
+}
+
+.payment-text strong {
+    color: #d32f2f;
+    font-weight: 600;
+}
+
+/* OHIP Number Input Formatting */
+#ohipNumber {
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+/* Responsive adjustments for payment */
+@media (max-width: 768px) {
+    .payment-acknowledgment {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .payment-text {
+        font-size: 13px;
+    }
+}

@@ -5325,3 +5325,62 @@ body {
         justify-content: center;
     }
 }
+
+/* Payment Tracking Styles */
+.payment-stats-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.payment-stats-grid .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.payment-stats-grid .stat-item i {
+    font-size: 16px;
+}
+
+.payment-stats-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+/* Payment tracking controls in RSVP items */
+.payment-tracking {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #e9ecef;
+}
+
+.payment-tracking label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.payment-tracking label:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: -4px -8px;
+}
+
+/* Responsive adjustments for payment tracking */
+@media (max-width: 768px) {
+    .payment-stats-grid {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .payment-stats-grid .stat-item {
+        justify-content: center;
+    }
+}

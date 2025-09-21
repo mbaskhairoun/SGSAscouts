@@ -40,6 +40,56 @@ function initializeAdminCalendar() {
     }
 }
 
+// Update payment status for a camping RSVP
+async function updatePaymentStatus(rsvpId, paymentReceived) {
+    try {
+        if (!adminCalendarDatabase) {
+            console.error('Database not available');
+            return;
+        }
+
+        const updateData = {
+            'campingDetails/paymentReceived': paymentReceived
+        };
+
+        if (paymentReceived) {
+            updateData['campingDetails/paymentReceivedDate'] = new Date().toISOString();
+            updateData['campingDetails/paymentReceivedBy'] = currentUser ? currentUser.email : 'admin';
+        } else {
+            updateData['campingDetails/paymentReceivedDate'] = null;
+            updateData['campingDetails/paymentReceivedBy'] = null;
+        }
+
+        await adminCalendarDatabase.ref(`calendar/rsvps/${rsvpId}`).update(updateData);
+
+        // Update the UI immediately
+        const checkbox = document.getElementById(`paymentReceived_${rsvpId}`);
+        const label = checkbox ? checkbox.nextElementSibling : null;
+
+        if (label) {
+            label.style.color = paymentReceived ? '#27ae60' : '#666';
+        }
+
+        // Refresh RSVPs to show updated date
+        loadAdminRSVPs();
+
+        showNotification(
+            paymentReceived ? 'Payment marked as received' : 'Payment marked as not received',
+            'success'
+        );
+
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        showNotification('Error updating payment status: ' + error.message, 'error');
+
+        // Revert checkbox state on error
+        const checkbox = document.getElementById(`paymentReceived_${rsvpId}`);
+        if (checkbox) {
+            checkbox.checked = !paymentReceived;
+        }
+    }
+}
+
 // Setup calendar tabs functionality
 function setupCalendarTabs() {
     const tabButtons = document.querySelectorAll('.calendar-admin-tabs .tab-btn');
@@ -329,72 +379,38 @@ function displayAdminRSVPs() {
                                 </div>
                             </div>
 
-                            ${(rsvp.campingDetails.medical && rsvp.campingDetails.medical.conditions) || (rsvp.campingDetails.medical && rsvp.campingDetails.medical.medications) ? `
-                                <div class="camping-section">
-                                    <strong>Medical Information:</strong>
-                                    <div class="camping-info">
-                                        ${rsvp.campingDetails.medical && rsvp.campingDetails.medical.conditions ? `<div>Conditions: ${rsvp.campingDetails.medical.conditions}</div>` : ''}
-                                        ${rsvp.campingDetails.medical && rsvp.campingDetails.medical.medications ? `<div>Medications: ${rsvp.campingDetails.medical.medications}</div>` : ''}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            ${(rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.restrictions && rsvp.campingDetails.dietary.restrictions.length > 0) || (rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.other) ? `
-                                <div class="camping-section">
-                                    <strong>Dietary Requirements:</strong>
-                                    <div class="camping-info">
-                                        ${rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.restrictions && rsvp.campingDetails.dietary.restrictions.length > 0 ? `<div>Restrictions: ${rsvp.campingDetails.dietary.restrictions.join(', ')}</div>` : ''}
-                                        ${rsvp.campingDetails.dietary && rsvp.campingDetails.dietary.other ? `<div>Other: ${rsvp.campingDetails.dietary.other}</div>` : ''}
-                                    </div>
-                                </div>
-                            ` : ''}
-
                             <div class="camping-section">
-                                <strong>Camping Info:</strong>
+                                <strong>OHIP Number:</strong>
                                 <div class="camping-info">
-                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.experience ? `<div>Experience: ${rsvp.campingDetails.camping.experience}</div>` : ''}
-                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.sleepingArrangements ? `<div>Sleeping: ${rsvp.campingDetails.camping.sleepingArrangements.replace('-', ' ')}</div>` : ''}
-                                    ${rsvp.campingDetails.camping && rsvp.campingDetails.camping.availableGear && rsvp.campingDetails.camping.availableGear.length > 0 ? `<div>Gear: ${rsvp.campingDetails.camping.availableGear.join(', ')}</div>` : ''}
+                                    ${rsvp.campingDetails.ohipNumber || 'Not provided'}
                                 </div>
                             </div>
 
-                            ${rsvp.campingDetails.transportation && rsvp.campingDetails.transportation.method ? `
-                                <div class="camping-section">
-                                    <strong>Transportation:</strong>
-                                    <div class="camping-info">
-                                        ${rsvp.campingDetails.transportation.method.replace('-', ' ')}
-                                        ${rsvp.campingDetails.transportation.carpoolSpaces ? ` (${rsvp.campingDetails.transportation.carpoolSpaces} seats available)` : ''}
+                            <div class="camping-section">
+                                <strong>Payment Status:</strong>
+                                <div class="camping-info">
+                                    <div style="margin-bottom: 8px;">
+                                        Acknowledgment: ${rsvp.campingDetails.paymentAcknowledged ?
+                                            '<span style="color: #27ae60;">✅ Acknowledged ($30 to raymonda@gmail.com)</span>' :
+                                            '<span style="color: #e74c3c;">❌ Not acknowledged</span>'}
+                                    </div>
+                                    <div class="payment-tracking">
+                                        <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                                            <input type="checkbox"
+                                                   id="paymentReceived_${rsvp.id || rsvp.timestamp}"
+                                                   ${rsvp.campingDetails.paymentReceived ? 'checked' : ''}
+                                                   onchange="updatePaymentStatus('${rsvp.id || rsvp.timestamp}', this.checked)"
+                                                   style="margin: 0;">
+                                            <span style="font-weight: 500; color: ${rsvp.campingDetails.paymentReceived ? '#27ae60' : '#666'};">
+                                                💰 Payment Received
+                                            </span>
+                                        </label>
+                                        ${rsvp.campingDetails.paymentReceivedDate ?
+                                            `<small style="color: #666; margin-left: 24px; display: block;">Received: ${new Date(rsvp.campingDetails.paymentReceivedDate).toLocaleDateString()}</small>` :
+                                            ''}
                                     </div>
                                 </div>
-                            ` : ''}
-
-                            ${rsvp.campingDetails.parentParticipation ? `
-                                <div class="camping-section">
-                                    <strong>Parent Participation:</strong>
-                                    <div class="camping-info">${rsvp.campingDetails.parentParticipation.replace('-', ' ')}</div>
-                                </div>
-                            ` : ''}
-
-                            ${rsvp.campingDetails.specialNeeds ? `
-                                <div class="camping-section">
-                                    <strong>Special Needs:</strong>
-                                    <div class="camping-info">${rsvp.campingDetails.specialNeeds}</div>
-                                </div>
-                            ` : ''}
-
-                            ${rsvp.campingDetails.contactInstructions ? `
-                                <div class="camping-section">
-                                    <strong>Contact Instructions:</strong>
-                                    <div class="camping-info">${rsvp.campingDetails.contactInstructions}</div>
-                                </div>
-                            ` : ''}
-
-                            ${rsvp.campingDetails.permissions && rsvp.campingDetails.permissions.length > 0 ? `
-                                <div class="camping-section">
-                                    <strong>Permissions:</strong>
-                                    <div class="camping-info">${rsvp.campingDetails.permissions.map(p => p.replace('-', ' ')).join(', ')}</div>
-                                </div>
-                            ` : ''}
+                            </div>
                         </div>
                     ` : ''}
 
@@ -479,10 +495,20 @@ function updateEventStats() {
 
 // Update RSVP statistics
 function updateRSVPStats() {
-    const totalRSVPs = adminCurrentRSVPs.length;
-    const attendingCount = adminCurrentRSVPs.filter(rsvp => rsvp.attendanceStatus === 'attending').length;
-    const notAttendingCount = adminCurrentRSVPs.filter(rsvp => rsvp.attendanceStatus === 'not-attending').length;
+    const filteredRSVPs = getFilteredRSVPs();
+    const totalRSVPs = filteredRSVPs.length;
+    const attendingCount = filteredRSVPs.filter(rsvp => rsvp.attendanceStatus === 'attending').length;
+    const notAttendingCount = filteredRSVPs.filter(rsvp => rsvp.attendanceStatus === 'not-attending').length;
 
+    // Payment statistics for camping events
+    const campingRSVPs = filteredRSVPs.filter(rsvp => rsvp.campingDetails);
+    const paymentAcknowledged = campingRSVPs.filter(rsvp => rsvp.campingDetails?.paymentAcknowledged).length;
+    const paymentReceived = campingRSVPs.filter(rsvp => rsvp.campingDetails?.paymentReceived).length;
+    const pendingPayments = campingRSVPs.filter(rsvp =>
+        rsvp.campingDetails?.paymentAcknowledged && !rsvp.campingDetails?.paymentReceived
+    ).length;
+
+    // Update basic stats
     const totalRSVPsElement = document.getElementById('totalRSVPsCount');
     const attendingElement = document.getElementById('attendingCount');
     const notAttendingElement = document.getElementById('notAttendingCount');
@@ -490,6 +516,55 @@ function updateRSVPStats() {
     if (totalRSVPsElement) totalRSVPsElement.textContent = totalRSVPs;
     if (attendingElement) attendingElement.textContent = attendingCount;
     if (notAttendingElement) notAttendingElement.textContent = notAttendingCount;
+
+    // Add or update payment stats
+    let paymentStatsElement = document.getElementById('paymentStats');
+    if (campingRSVPs.length > 0) {
+        if (!paymentStatsElement) {
+            // Create payment stats section
+            const rsvpStatsDiv = document.querySelector('.rsvp-stats');
+            if (rsvpStatsDiv) {
+                paymentStatsElement = document.createElement('div');
+                paymentStatsElement.id = 'paymentStats';
+                paymentStatsElement.className = 'payment-stats-section';
+                paymentStatsElement.innerHTML = `
+                    <div style="border-top: 1px solid #dee2e6; padding-top: 15px; margin-top: 15px;">
+                        <h4 style="color: #2c5aa0; margin-bottom: 10px;">
+                            <i class="fas fa-dollar-sign"></i> Payment Tracking
+                        </h4>
+                        <div class="payment-stats-grid">
+                            <span class="stat-item">
+                                <i class="fas fa-check-circle" style="color: #27ae60;"></i>
+                                <strong id="paymentReceivedCount">0</strong> received
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-clock" style="color: #f39c12;"></i>
+                                <strong id="pendingPaymentCount">0</strong> pending
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-handshake" style="color: #3498db;"></i>
+                                <strong id="paymentAcknowledgedCount">0</strong> acknowledged
+                            </span>
+                        </div>
+                    </div>
+                `;
+                rsvpStatsDiv.appendChild(paymentStatsElement);
+            }
+        }
+
+        // Update payment counts
+        const paymentReceivedElement = document.getElementById('paymentReceivedCount');
+        const pendingPaymentElement = document.getElementById('pendingPaymentCount');
+        const paymentAcknowledgedElement = document.getElementById('paymentAcknowledgedCount');
+
+        if (paymentReceivedElement) paymentReceivedElement.textContent = paymentReceived;
+        if (pendingPaymentElement) pendingPaymentElement.textContent = pendingPayments;
+        if (paymentAcknowledgedElement) paymentAcknowledgedElement.textContent = paymentAcknowledged;
+
+        paymentStatsElement.style.display = 'block';
+    } else if (paymentStatsElement) {
+        paymentStatsElement.style.display = 'none';
+    }
 }
 
 // Populate RSVP event filter dropdown
