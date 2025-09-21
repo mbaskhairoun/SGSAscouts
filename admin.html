@@ -955,6 +955,13 @@
                 <div class="form-group">
                     <label>Content *</label>
                     <textarea name="content" required rows="8" placeholder="Enter announcement content...&#10;&#10;You can write multiple lines and paragraphs.&#10;Press Enter for new lines." style="min-height: 120px; resize: vertical;"></textarea>
+                    <div class="hyperlink-helper">
+                        <small><strong>Adding Hyperlinks:</strong> To add clickable links, use this format: [link text](URL)</small>
+                        <div class="hyperlink-examples">
+                            <span class="example-item">Example: [Visit our website](https://example.com)</span>
+                            <span class="example-item">Example: [Email us](mailto:info@example.com)</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Image Upload Section -->
@@ -1028,6 +1035,13 @@
                 <div class="form-group">
                     <label>Content *</label>
                     <textarea name="content" required rows="8" placeholder="Enter announcement content...&#10;&#10;You can write multiple lines and paragraphs.&#10;Press Enter for new lines." style="min-height: 120px; resize: vertical;"></textarea>
+                    <div class="hyperlink-helper">
+                        <small><strong>Adding Hyperlinks:</strong> To add clickable links, use this format: [link text](URL)</small>
+                        <div class="hyperlink-examples">
+                            <span class="example-item">Example: [Visit our website](https://example.com)</span>
+                            <span class="example-item">Example: [Email us](mailto:info@example.com)</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Edit Image Upload Section -->
@@ -2086,6 +2100,48 @@
     <script src="announcement-images.js"></script>
     <script src="admin-calendar.js"></script>
     <script src="admin-troops.js"></script>
+
+    <!-- Hyperlink Helper Styling -->
+    <style>
+        .hyperlink-helper {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #f8f9ff;
+            border: 1px solid #e3e8ff;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .hyperlink-helper small {
+            color: #4338ca;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .hyperlink-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .example-item {
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            background-color: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 3px solid #4338ca;
+        }
+
+        @media (max-width: 768px) {
+            .hyperlink-helper {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
 
     <!-- Camping Details Styling for Admin -->
     <style>

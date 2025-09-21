@@ -2012,6 +2012,39 @@ html {
     font-size: 1rem;
 }
 
+/* Hyperlink styles for announcements */
+.announcement-content a,
+.announcement-text a {
+    color: #2c5aa0;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.announcement-content a:hover,
+.announcement-text a:hover {
+    color: #1e3a8a;
+    border-bottom: 1px solid #2c5aa0;
+    background-color: rgba(44, 90, 160, 0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.announcement-content a:visited,
+.announcement-text a:visited {
+    color: #6366f1;
+}
+
+/* External link indicator */
+.announcement-content a[target="_blank"]::after,
+.announcement-text a[target="_blank"]::after {
+    content: "↗";
+    font-size: 0.8em;
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
 .announcement-meta {
     display: flex;
     align-items: center;

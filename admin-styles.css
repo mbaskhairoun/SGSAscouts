@@ -1430,6 +1430,39 @@ body {
     margin-bottom: 15px;
 }
 
+/* Hyperlink styles for announcements in admin panel */
+.announcement-text a,
+.announcement-content a {
+    color: #2c5aa0;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.announcement-text a:hover,
+.announcement-content a:hover {
+    color: #1e3a8a;
+    border-bottom: 1px solid #2c5aa0;
+    background-color: rgba(44, 90, 160, 0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.announcement-text a:visited,
+.announcement-content a:visited {
+    color: #6366f1;
+}
+
+/* External link indicator */
+.announcement-text a[target="_blank"]::after,
+.announcement-content a[target="_blank"]::after {
+    content: "↗";
+    font-size: 0.8em;
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
 .announcement-footer {
     display: flex;
     justify-content: space-between;

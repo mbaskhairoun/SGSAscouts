@@ -1112,7 +1112,7 @@ function displayAnnouncements(announcementsToShow) {
                 </div>
                 <div class="announcement-content">
                     <h3 class="announcement-title">${announcement.title}</h3>
-                    <p class="announcement-text" style="white-space: pre-wrap;">${announcement.content}</p>
+                    <div class="announcement-text" style="white-space: pre-wrap;">${convertLinksToHTML(announcement.content)}</div>
                     ${announcement.images && announcement.images.length > 0 ? `
                         <div class="announcement-images-container" id="announcement-images-${announcement.id}"></div>
                     ` : ''}
@@ -1171,7 +1171,46 @@ function updateAnnouncementPreview(previewId, title, content) {
 
     previewTitle.textContent = title || 'Your announcement title will appear here';
     previewContent.style.whiteSpace = 'pre-wrap';
-    previewContent.textContent = content || 'Your announcement content will appear here';
+
+    if (content) {
+        previewContent.innerHTML = convertLinksToHTML(content);
+    } else {
+        previewContent.textContent = 'Your announcement content will appear here';
+    }
+}
+
+// Function to convert markdown-style links to HTML
+function convertLinksToHTML(text) {
+    if (!text) return text;
+
+    // Regex to match [link text](URL) pattern
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+    return text.replace(linkRegex, (match, linkText, url) => {
+        // Basic URL validation and sanitization
+        let cleanUrl = url.trim();
+
+        // Ensure URL has protocol for external links
+        if (!cleanUrl.startsWith('http://') &&
+            !cleanUrl.startsWith('https://') &&
+            !cleanUrl.startsWith('mailto:') &&
+            !cleanUrl.startsWith('tel:')) {
+            // If it looks like a domain, add https://
+            if (cleanUrl.includes('.') && !cleanUrl.includes(' ')) {
+                cleanUrl = 'https://' + cleanUrl;
+            }
+        }
+
+        // Security: Basic XSS prevention
+        const cleanLinkText = linkText.replace(/[<>"']/g, '');
+        cleanUrl = cleanUrl.replace(/[<>"']/g, '');
+
+        // Determine if link should open in new tab
+        const isExternal = cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://');
+        const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+        return `<a href="${cleanUrl}"${target}>${cleanLinkText}</a>`;
+    });
 }
 
 async function handleAddAnnouncement(e) {
