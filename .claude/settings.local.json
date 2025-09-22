@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python:*)",
       "Bash(findstr:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(start admin.html)"
     ],
     "deny": [],
     "ask": []
