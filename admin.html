@@ -87,6 +87,10 @@
                     <i class="fas fa-envelope-open-text"></i>
                     <span>Subscribers</span>
                 </li>
+                <li class="menu-item" data-section="customEmail">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Custom Email</span>
+                </li>
                 <li class="menu-item" data-section="calendar">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Calendar & Events</span>
@@ -496,6 +500,90 @@
                     <i class="fas fa-envelope-open-text"></i>
                     <h3>No Subscribers Yet</h3>
                     <p>Subscribers from the website's Join Us form will appear here.</p>
+                </div>
+            </section>
+
+            <!-- Custom Email Section -->
+            <section id="customEmailSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Send Custom Email</h2>
+                        <p>Send personalized emails to all subscribers</p>
+                    </div>
+                    <div class="section-actions">
+                        <span id="subscriberCount" class="subscriber-count">Loading subscribers...</span>
+                    </div>
+                </div>
+
+                <div class="custom-email-container">
+                    <form id="customEmailForm" class="custom-email-form">
+                        <div class="form-group">
+                            <label for="emailSubject">Subject</label>
+                            <input type="text" id="emailSubject" placeholder="Enter email subject..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailMessage">Message</label>
+                            <textarea id="emailMessage" placeholder="Enter your message..." rows="10" required></textarea>
+                            <div class="message-tools">
+                                <small class="char-count">0 characters</small>
+                                <div class="format-buttons">
+                                    <button type="button" class="format-btn" data-format="bold" title="Bold">
+                                        <i class="fas fa-bold"></i>
+                                    </button>
+                                    <button type="button" class="format-btn" data-format="italic" title="Italic">
+                                        <i class="fas fa-italic"></i>
+                                    </button>
+                                    <button type="button" class="format-btn" data-format="link" title="Add Link">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="senderName">Sender Name</label>
+                            <input type="text" id="senderName" value="SGSA Scouts" placeholder="Sender name...">
+                        </div>
+
+                        <div class="email-preview">
+                            <h4>Email Preview</h4>
+                            <div id="emailPreviewContent" class="preview-content">
+                                <div class="preview-header">
+                                    <strong>From:</strong> <span id="previewSender">SGSA Scouts</span><br>
+                                    <strong>Subject:</strong> <span id="previewSubject">Subject will appear here</span>
+                                </div>
+                                <div class="preview-body">
+                                    <div id="previewMessage">Message will appear here</div>
+                                    <hr style="margin: 20px 0; border: 1px solid #eee;">
+                                    <p style="color: #666; font-size: 12px;">
+                                        This email was sent from SGSA Scouts<br>
+                                        You're receiving this because you're subscribed to our mailing list.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="previewEmailBtn" class="btn-secondary">
+                                <i class="fas fa-eye"></i>
+                                Preview
+                            </button>
+                            <button type="submit" id="sendCustomEmailBtn" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send to All Subscribers
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="customEmailStatus" class="status-message" style="display: none;"></div>
+                </div>
+
+                <!-- No Subscribers Placeholder -->
+                <div id="noSubscribersCustomEmail" class="empty-state" style="display: none;">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <h3>No Subscribers Yet</h3>
+                    <p>You need subscribers to send custom emails. Check the Subscribers section.</p>
                 </div>
             </section>
 

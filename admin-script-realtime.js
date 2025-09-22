@@ -522,6 +522,8 @@ function showSection(sectionName) {
         scouts: { title: 'Scout Roster', subtitle: 'Manage scout enrollment and information' },
         attendance: { title: 'Attendance Tracking', subtitle: 'Weekly attendance management' },
         announcements: { title: 'Announcements', subtitle: 'Manage announcements displayed on the main website' },
+        subscribers: { title: 'Subscribers', subtitle: 'Manage email subscribers and mailing list' },
+        customEmail: { title: 'Send Custom Email', subtitle: 'Send personalized emails to all subscribers' },
         curriculum: { title: 'Curriculum Management', subtitle: 'Manage weekly curriculum content and activities' },
         yearOverview: { title: 'Year Overview', subtitle: 'SGSA Sea Scouts program structure and planning reference' },
         reports: { title: 'Reports & Analytics', subtitle: 'Generate and export attendance reports' },
@@ -542,6 +544,9 @@ function showSection(sectionName) {
             break;
         case 'announcements':
             loadAnnouncements();
+            break;
+        case 'customEmail':
+            initCustomEmailSection();
             break;
         case 'curriculum':
             loadCurriculum();
@@ -3527,5 +3532,241 @@ async function downloadRSVPReport() {
         const button = document.getElementById('downloadRSVPReport');
         button.innerHTML = '<i class="fas fa-download"></i> Download RSVP Report';
         button.disabled = false;
+    }
+}
+
+// Custom Email Functionality
+async function initCustomEmailSection() {
+    try {
+        // Load subscriber count
+        const subscribers = await getSubscribers();
+        const subscriberCountEl = document.getElementById('subscriberCount');
+        const customEmailContainer = document.querySelector('.custom-email-container');
+        const noSubscribersEl = document.getElementById('noSubscribersCustomEmail');
+
+        if (subscribers.length > 0) {
+            subscriberCountEl.textContent = `${subscribers.length} active subscribers`;
+            customEmailContainer.style.display = 'block';
+            noSubscribersEl.style.display = 'none';
+        } else {
+            subscriberCountEl.textContent = 'No active subscribers';
+            customEmailContainer.style.display = 'none';
+            noSubscribersEl.style.display = 'block';
+        }
+
+        // Initialize form functionality
+        setupCustomEmailForm();
+    } catch (error) {
+        console.error('Error initializing custom email section:', error);
+        document.getElementById('subscriberCount').textContent = 'Error loading subscribers';
+    }
+}
+
+function setupCustomEmailForm() {
+    const form = document.getElementById('customEmailForm');
+    const subjectInput = document.getElementById('emailSubject');
+    const messageTextarea = document.getElementById('emailMessage');
+    const senderNameInput = document.getElementById('senderName');
+    const previewBtn = document.getElementById('previewEmailBtn');
+    const charCount = document.querySelector('.char-count');
+
+    // Real-time preview updates
+    function updatePreview() {
+        const subject = subjectInput.value || 'Subject will appear here';
+        const message = messageTextarea.value || 'Message will appear here';
+        const senderName = senderNameInput.value || 'SGSA Scouts';
+
+        document.getElementById('previewSubject').textContent = subject;
+        document.getElementById('previewMessage').innerHTML = message.replace(/\n/g, '<br>');
+        document.getElementById('previewSender').textContent = senderName;
+    }
+
+    // Character count
+    function updateCharCount() {
+        const count = messageTextarea.value.length;
+        charCount.textContent = `${count} characters`;
+    }
+
+    // Event listeners
+    subjectInput.addEventListener('input', updatePreview);
+    messageTextarea.addEventListener('input', () => {
+        updatePreview();
+        updateCharCount();
+    });
+    senderNameInput.addEventListener('input', updatePreview);
+
+    // Format buttons
+    const formatButtons = document.querySelectorAll('.format-btn');
+    formatButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const format = btn.dataset.format;
+            handleTextFormatting(format);
+        });
+    });
+
+    // Preview button
+    previewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        togglePreview();
+    });
+
+    // Form submission
+    form.addEventListener('submit', handleCustomEmailSubmit);
+
+    // Initialize preview
+    updatePreview();
+    updateCharCount();
+}
+
+function handleTextFormatting(format) {
+    const textarea = document.getElementById('emailMessage');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+
+    let replacement = '';
+    switch (format) {
+        case 'bold':
+            replacement = `**${selectedText}**`;
+            break;
+        case 'italic':
+            replacement = `*${selectedText}*`;
+            break;
+        case 'link':
+            const url = prompt('Enter URL:');
+            if (url) {
+                replacement = selectedText ? `[${selectedText}](${url})` : `[Link Text](${url})`;
+            } else {
+                return;
+            }
+            break;
+    }
+
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+
+    // Update preview
+    document.getElementById('emailMessage').dispatchEvent(new Event('input'));
+}
+
+function togglePreview() {
+    const preview = document.querySelector('.email-preview');
+    const btn = document.getElementById('previewEmailBtn');
+
+    if (preview.style.display === 'none') {
+        preview.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Preview';
+    } else {
+        preview.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-eye"></i> Show Preview';
+    }
+}
+
+async function handleCustomEmailSubmit(e) {
+    e.preventDefault();
+
+    const subject = document.getElementById('emailSubject').value.trim();
+    const message = document.getElementById('emailMessage').value.trim();
+    const senderName = document.getElementById('senderName').value.trim();
+    const statusEl = document.getElementById('customEmailStatus');
+    const submitBtn = document.getElementById('sendCustomEmailBtn');
+
+    // Validation
+    if (!subject || !message) {
+        showStatus('Please fill in both subject and message fields.', 'error');
+        return;
+    }
+
+    try {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Emails...';
+        showStatus('Sending emails to all subscribers...', 'loading');
+
+        // Get subscribers
+        const subscribers = await getSubscribers();
+
+        if (subscribers.length === 0) {
+            showStatus('No active subscribers found.', 'error');
+            return;
+        }
+
+        // Send emails to all subscribers
+        let successCount = 0;
+        let failureCount = 0;
+
+        for (const subscriber of subscribers) {
+            try {
+                const response = await fetch('/.netlify/functions/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: subscriber.email,
+                        subject: subject,
+                        message: message,
+                        sender_name: senderName
+                    })
+                });
+
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    failureCount++;
+                    console.error(`Failed to send email to ${subscriber.email}`);
+                }
+            } catch (error) {
+                failureCount++;
+                console.error(`Error sending email to ${subscriber.email}:`, error);
+            }
+        }
+
+        // Show results
+        if (successCount > 0 && failureCount === 0) {
+            showStatus(`✅ Successfully sent emails to all ${successCount} subscribers!`, 'success');
+            // Clear form
+            document.getElementById('customEmailForm').reset();
+            document.getElementById('emailMessage').dispatchEvent(new Event('input'));
+        } else if (successCount > 0 && failureCount > 0) {
+            showStatus(`⚠️ Sent ${successCount} emails successfully, ${failureCount} failed. Check console for details.`, 'error');
+        } else {
+            showStatus(`❌ Failed to send emails. Please try again.`, 'error');
+        }
+
+    } catch (error) {
+        console.error('Error sending custom emails:', error);
+        showStatus('Error sending emails. Please try again.', 'error');
+    } finally {
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All Subscribers';
+    }
+}
+
+function showStatus(message, type) {
+    const statusEl = document.getElementById('customEmailStatus');
+    statusEl.textContent = message;
+    statusEl.className = `status-message ${type}`;
+    statusEl.style.display = 'block';
+
+    // Auto-hide after 5 seconds for success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Add to section switcher
+function addCustomEmailSectionHandler() {
+    const customEmailMenuItem = document.querySelector('[data-section="customEmail"]');
+    if (customEmailMenuItem) {
+        customEmailMenuItem.addEventListener('click', () => {
+            switchSection('customEmailSection');
+            initCustomEmailSection();
+        });
     }
 }
