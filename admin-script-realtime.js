@@ -104,7 +104,7 @@ async function getSubscribers() {
     }
 }
 
-async function sendAnnouncementEmail(announcement, subscribers, token) {
+async function sendAnnouncementEmail(announcement, subscribers) {
     try {
         // Convert announcement content to HTML with proper line breaks and links
         const htmlContent = announcement.content
@@ -166,35 +166,36 @@ Contact us at info@sgsascouts.ca if you have any questions.
             `.trim()
         };
 
-        // Send email using MailerSend API
-        console.log('Sending request to MailerSend API...');
-        console.log('Email data:', {
-            from: emailData.from,
-            to: emailData.to,
-            subject: emailData.subject,
-            recipientCount: emailData.to.length
+        // Send emails using Netlify function
+        console.log('Sending emails via Netlify function...');
+        console.log('Email recipients:', subscribers.length);
+
+        // Send individual emails to each subscriber
+        const emailPromises = subscribers.map(async (subscriber) => {
+            const response = await fetch('/.netlify/functions/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    to: subscriber.email,
+                    subject: `SGSA Scouts - ${announcement.title}`,
+                    message: `${announcement.content}\n\nPosted: ${new Date(announcement.timestamp).toLocaleDateString()}\nPriority: ${announcement.priority.toUpperCase()}`,
+                    sender_name: 'SGSA Scouts'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error(`Failed to send email to ${subscriber.email}:`, errorData);
+                throw new Error(`Email send error: ${response.status} - ${errorData}`);
+            }
+
+            return response.json();
         });
 
-        const response = await fetch('https://api.mailersend.com/v1/email', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(emailData)
-        });
-
-        console.log('MailerSend API response status:', response.status);
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error('MailerSend API error response:', errorData);
-            throw new Error(`MailerSend API error: ${response.status} - ${errorData}`);
-        }
-
-        const responseData = await response.json();
-        console.log('MailerSend API success response:', responseData);
+        // Wait for all emails to be sent
+        await Promise.all(emailPromises);
         console.log('Emails sent successfully to', subscribers.length, 'subscribers');
         return true;
     } catch (error) {
@@ -207,9 +208,6 @@ async function sendAnnouncementNotifications(announcement) {
     try {
         console.log('Starting email notification process...');
 
-        // Get MailerSend token
-        const token = await getMailerSendToken();
-
         // Get active subscribers
         const subscribers = await getSubscribers();
 
@@ -219,7 +217,7 @@ async function sendAnnouncementNotifications(announcement) {
         }
 
         // Send emails
-        await sendAnnouncementEmail(announcement, subscribers, token);
+        await sendAnnouncementEmail(announcement, subscribers);
 
         return {
             success: true,
