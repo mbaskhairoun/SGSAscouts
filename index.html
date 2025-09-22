@@ -454,10 +454,44 @@
                             </div>
                         </div>
                     </div>
-                    <div class="join-card">
-                        <h3>Get Started</h3>
-                        <p>Contact us to learn more about joining SGSA Sea Scouts and to find the right team for your age group.</p>
-                        <a href="#contact" class="contact-button">Contact Us</a>
+                    <div class="join-card signup-card">
+                        <h3>Join Our Mailing List</h3>
+                        <p>Sign up to receive updates about SGSA Sea Scouts activities, events, and enrollment opportunities.</p>
+
+                        <form id="joinUsForm" class="join-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name *</label>
+                                    <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name *</label>
+                                    <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" name="email" required placeholder="Enter email address">
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="join-submit-btn">
+                                    <i class="fas fa-envelope"></i>
+                                    Join Our Mailing List
+                                </button>
+                            </div>
+
+                            <p class="privacy-note">
+                                <small>We respect your privacy. Your information will only be used to send you updates about SGSA Sea Scouts programs and events.</small>
+                            </p>
+                        </form>
+
+                        <div id="joinSuccessMessage" class="success-message" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>Thank you for joining!</h4>
+                            <p>We've added you to our mailing list. You'll receive updates about SGSA Sea Scouts activities and enrollment opportunities.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1157,6 +1191,73 @@
             if (modal) {
                 modal.remove();
                 document.body.style.overflow = '';
+            }
+        }
+
+        // Join Us Form Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const joinUsForm = document.getElementById('joinUsForm');
+            if (joinUsForm) {
+                joinUsForm.addEventListener('submit', handleJoinUsSubmission);
+            }
+        });
+
+        async function handleJoinUsSubmission(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('.join-submit-btn');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+
+            try {
+                // Prepare subscriber data
+                const subscriberData = {
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
+                    email: formData.get('email'),
+                    timestamp: Date.now(),
+                    dateJoined: new Date().toISOString().split('T')[0],
+                    status: 'active'
+                };
+
+                // Save to Firebase
+                if (announcementsDatabase) {
+                    const subscribersRef = announcementsDatabase.ref('subscribers');
+                    await subscribersRef.push(subscriberData);
+
+                    console.log('Subscriber added successfully:', subscriberData);
+
+                    // Show success message
+                    form.style.display = 'none';
+                    document.getElementById('joinSuccessMessage').style.display = 'block';
+
+                    // Reset form after a delay
+                    setTimeout(() => {
+                        form.reset();
+                        form.style.display = 'block';
+                        document.getElementById('joinSuccessMessage').style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }, 5000);
+
+                } else {
+                    throw new Error('Database connection not available');
+                }
+
+            } catch (error) {
+                console.error('Error saving subscriber:', error);
+
+                // Show error message
+                alert('Sorry, there was an error processing your request. Please try again or contact us directly.');
+
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         }
     </script>

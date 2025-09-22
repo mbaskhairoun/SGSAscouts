@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>SGSA Scouts - Admin Dashboard</title>
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="subscribers-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -81,6 +82,10 @@
                 <li class="menu-item" data-section="announcements">
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
+                </li>
+                <li class="menu-item" data-section="subscribers">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Subscribers</span>
                 </li>
                 <li class="menu-item" data-section="calendar">
                     <i class="fas fa-calendar-alt"></i>
@@ -428,6 +433,69 @@
 
                 <div class="announcements-grid" id="announcementsGrid">
                     <!-- Announcements will be populated here -->
+                </div>
+            </section>
+
+            <!-- Subscribers Section -->
+            <section id="subscribersSection" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Mailing List Subscribers</h2>
+                        <p>Manage subscribers from the Join Us form on the main website</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="download-btn" onclick="exportSubscribers()">
+                            <i class="fas fa-download"></i>
+                            Export CSV
+                        </button>
+                        <button class="download-btn" onclick="testEmailSystem()" style="background: #17a2b8; margin-left: 10px;">
+                            <i class="fas fa-envelope-open-text"></i>
+                            Test Email System
+                        </button>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="subscriberSearch" placeholder="Search subscribers..." oninput="filterSubscribers()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subscribers-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalSubscribers">0</span>
+                        <span class="stat-label">Total Subscribers</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="subscribersThisMonth">0</span>
+                        <span class="stat-label">This Month</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="subscribersThisWeek">0</span>
+                        <span class="stat-label">This Week</span>
+                    </div>
+                </div>
+
+                <div class="subscribers-table-container">
+                    <table class="subscribers-table">
+                        <thead>
+                            <tr>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Date Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscribersTableBody">
+                            <!-- Subscribers will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="subscribersEmptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <h3>No Subscribers Yet</h3>
+                    <p>Subscribers from the website's Join Us form will appear here.</p>
                 </div>
             </section>
 
@@ -998,6 +1066,19 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <div class="email-notification-section">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="sendEmailNotification" id="sendEmailNotification">
+                            <span class="checkbox-custom"></span>
+                            <span class="label-text">
+                                <strong>Send Email Notification</strong>
+                                <small>Send this announcement to all subscribers via email</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Preview</label>
                     <div id="announcementPreview" class="announcement-preview">
@@ -1078,6 +1159,19 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Email Notification Section -->
+                <div class="email-notification-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="sendEmailNotification" id="editSendEmailNotification">
+                        <span class="checkbox-custom"></span>
+                        <span class="label-text">
+                            <strong>Send Email Notification</strong>
+                            <small>Send this announcement to all subscribers via email</small>
+                        </span>
+                    </label>
+                </div>
+
                 <div class="form-group">
                     <label>Preview</label>
                     <div id="editAnnouncementPreview" class="announcement-preview">
@@ -1090,6 +1184,47 @@
                     <button type="submit" class="action-btn primary">
                         <i class="fas fa-save"></i>
                         Update Announcement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Subscriber Modal -->
+    <div id="editSubscriberModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Subscriber</h3>
+                <button class="close-btn" onclick="closeModal('editSubscriberModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editSubscriberForm" class="subscriber-form">
+                <input type="hidden" name="subscriberId">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" name="firstName" required placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" name="lastName" required placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" name="email" required placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="active">Active</option>
+                        <option value="unsubscribed">Unsubscribed</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeModal('editSubscriberModal')">Cancel</button>
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i>
+                        Update Subscriber
                     </button>
                 </div>
             </form>
@@ -2100,6 +2235,7 @@
     <script src="announcement-images.js"></script>
     <script src="admin-calendar.js"></script>
     <script src="admin-troops.js"></script>
+    <script src="admin-subscribers.js"></script>
 
     <!-- Hyperlink Helper Styling -->
     <style>

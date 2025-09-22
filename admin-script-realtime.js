@@ -49,6 +49,246 @@ function hideAllModals() {
     });
 }
 
+// MailerSend Email Functions
+async function getMailerSendToken() {
+    try {
+        console.log('Attempting to retrieve MailerSend token from Firebase...');
+        const configRef = database.ref('config/mailersend/token');
+        const snapshot = await configRef.once('value');
+        const token = snapshot.val();
+
+        console.log('Token snapshot exists:', snapshot.exists());
+        console.log('Token value type:', typeof token);
+        console.log('Token length:', token ? token.length : 'null');
+
+        if (!token) {
+            throw new Error('MailerSend token not found in Firebase config at config/mailersend/token');
+        }
+
+        console.log('MailerSend token retrieved successfully');
+        return token;
+    } catch (error) {
+        console.error('Error getting MailerSend token:', error);
+        throw error;
+    }
+}
+
+async function getSubscribers() {
+    try {
+        console.log('Retrieving subscribers from database...');
+        const subscribersRef = database.ref('subscribers');
+        const snapshot = await subscribersRef.once('value');
+        const data = snapshot.val();
+
+        console.log('Subscribers snapshot exists:', snapshot.exists());
+        console.log('Subscribers data:', data ? 'Data found' : 'No data');
+
+        const subscribers = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                console.log(`Subscriber ${key}:`, data[key]);
+                if (data[key].status === 'active') {
+                    subscribers.push({
+                        id: key,
+                        ...data[key]
+                    });
+                }
+            });
+        }
+
+        console.log(`Found ${subscribers.length} active subscribers:`, subscribers.map(s => s.email));
+        return subscribers;
+    } catch (error) {
+        console.error('Error getting subscribers:', error);
+        throw error;
+    }
+}
+
+async function sendAnnouncementEmail(announcement, subscribers, token) {
+    try {
+        // Convert announcement content to HTML with proper line breaks and links
+        const htmlContent = announcement.content
+            .replace(/\n/g, '<br>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #2c5aa0; text-decoration: none;">$1</a>');
+
+        const emailData = {
+            from: {
+                email: "info@sgsascouts.ca",
+                name: "SGSA Scouts"
+            },
+            to: subscribers.map(sub => ({
+                email: sub.email,
+                name: `${sub.firstName} ${sub.lastName}`
+            })),
+            subject: `New Announcement: ${announcement.title}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background: linear-gradient(135deg, #2c5aa0, #1e4085); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                        <h1 style="margin: 0; font-size: 28px;">🏕️ SGSA Scouts</h1>
+                        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">New Announcement</p>
+                    </div>
+
+                    <div style="background: white; padding: 30px; border: 1px solid #e9ecef; border-top: none;">
+                        <h2 style="color: #2c5aa0; margin-top: 0; font-size: 24px;">${announcement.title}</h2>
+                        <div style="color: #333; font-size: 16px; line-height: 1.6; margin: 20px 0;">
+                            ${htmlContent}
+                        </div>
+
+                        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 30px 0;">
+                            <p style="margin: 0; color: #666; font-size: 14px;">
+                                <strong>Posted:</strong> ${new Date(announcement.timestamp).toLocaleDateString()}<br>
+                                <strong>Priority:</strong> ${announcement.priority.toUpperCase()}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; border: 1px solid #e9ecef; border-top: none;">
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            You're receiving this because you're subscribed to SGSA Scouts announcements.<br>
+                            <a href="mailto:info@sgsascouts.ca" style="color: #2c5aa0; text-decoration: none;">Contact us</a> if you have any questions.
+                        </p>
+                    </div>
+                </div>
+            `,
+            text: `
+SGSA Scouts - New Announcement
+
+${announcement.title}
+
+${announcement.content}
+
+Posted: ${new Date(announcement.timestamp).toLocaleDateString()}
+Priority: ${announcement.priority.toUpperCase()}
+
+---
+You're receiving this because you're subscribed to SGSA Scouts announcements.
+Contact us at info@sgsascouts.ca if you have any questions.
+            `.trim()
+        };
+
+        // Send email using MailerSend API
+        console.log('Sending request to MailerSend API...');
+        console.log('Email data:', {
+            from: emailData.from,
+            to: emailData.to,
+            subject: emailData.subject,
+            recipientCount: emailData.to.length
+        });
+
+        const response = await fetch('https://api.mailersend.com/v1/email', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        console.log('MailerSend API response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('MailerSend API error response:', errorData);
+            throw new Error(`MailerSend API error: ${response.status} - ${errorData}`);
+        }
+
+        const responseData = await response.json();
+        console.log('MailerSend API success response:', responseData);
+        console.log('Emails sent successfully to', subscribers.length, 'subscribers');
+        return true;
+    } catch (error) {
+        console.error('Error sending announcement emails:', error);
+        throw error;
+    }
+}
+
+async function sendAnnouncementNotifications(announcement) {
+    try {
+        console.log('Starting email notification process...');
+
+        // Get MailerSend token
+        const token = await getMailerSendToken();
+
+        // Get active subscribers
+        const subscribers = await getSubscribers();
+
+        if (subscribers.length === 0) {
+            console.log('No active subscribers found');
+            return { success: true, message: 'No subscribers to notify' };
+        }
+
+        // Send emails
+        await sendAnnouncementEmail(announcement, subscribers, token);
+
+        return {
+            success: true,
+            message: `Email notifications sent to ${subscribers.length} subscribers`
+        };
+    } catch (error) {
+        console.error('Failed to send announcement notifications:', error);
+        return {
+            success: false,
+            message: `Failed to send notifications: ${error.message}`
+        };
+    }
+}
+
+// Test function for debugging email system
+async function testEmailSystem() {
+    console.log('=== EMAIL SYSTEM TEST ===');
+
+    try {
+        // Test 1: Get token
+        console.log('Test 1: Getting MailerSend token...');
+        const token = await getMailerSendToken();
+        console.log('✓ Token retrieved successfully');
+
+        // Test 2: Get subscribers
+        console.log('Test 2: Getting subscribers...');
+        const subscribers = await getSubscribers();
+        console.log(`✓ Found ${subscribers.length} subscribers`);
+
+        if (subscribers.length === 0) {
+            console.log('⚠️ No subscribers found - cannot test email sending');
+            return;
+        }
+
+        // Test 3: Create test announcement
+        console.log('Test 3: Creating test announcement...');
+        const testAnnouncement = {
+            title: 'Test Email System',
+            content: 'This is a test email to verify the email system is working correctly.\n\nPlease ignore this message.',
+            priority: 'low',
+            active: true,
+            timestamp: Date.now(),
+            author: 'admin@test.com',
+            dateCreated: new Date().toISOString().split('T')[0]
+        };
+
+        // Test 4: Send test email
+        console.log('Test 4: Sending test email...');
+        const result = await sendAnnouncementNotifications(testAnnouncement);
+
+        if (result.success) {
+            console.log('✓ Email system test PASSED');
+            console.log('Result:', result.message);
+        } else {
+            console.log('✗ Email system test FAILED');
+            console.log('Error:', result.message);
+        }
+
+    } catch (error) {
+        console.log('✗ Email system test FAILED with error:', error.message);
+        console.error('Full error:', error);
+    }
+
+    console.log('=== EMAIL SYSTEM TEST COMPLETE ===');
+}
+
+// Make test function available globally for console testing
+window.testEmailSystem = testEmailSystem;
+
 // Initialize authentication state
 function initializeApp() {
     console.log('Initializing authentication...');
@@ -1249,9 +1489,41 @@ async function handleAddAnnouncement(e) {
         const announcementsRef = database.ref('announcements');
         await announcementsRef.push(announcementData);
 
+        // Check if email notification is requested
+        const checkboxValue = formData.get('sendEmailNotification');
+        const sendEmailNotification = checkboxValue !== null; // checkbox exists in formData when checked
+        console.log('Email notification checkbox value:', checkboxValue);
+        console.log('Send email notification?', sendEmailNotification);
+
+        // Also log all form data for debugging
+        console.log('All form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        if (sendEmailNotification) {
+            console.log('Starting email notification process...');
+            showNotification('Sending email notifications...', 'info');
+
+            try {
+                const emailResult = await sendAnnouncementNotifications(announcementData);
+                if (emailResult.success) {
+                    console.log('Email notifications sent successfully');
+                    showNotification(`Announcement created and ${emailResult.message}!`, 'success');
+                } else {
+                    console.warn('Email notifications failed:', emailResult.message);
+                    showNotification(`Announcement created but email notifications failed: ${emailResult.message}`, 'warning');
+                }
+            } catch (emailError) {
+                console.error('Email notification error:', emailError);
+                showNotification(`Announcement created but email notifications failed: ${emailError.message}`, 'warning');
+            }
+        } else {
+            showNotification('Announcement created successfully!', 'success');
+        }
+
         hideLoadingSpinner();
         closeModal('addAnnouncementModal');
-        showNotification('Announcement created successfully!', 'success');
         loadAnnouncements(); // Reload the announcements
     } catch (error) {
         hideLoadingSpinner();
@@ -1295,9 +1567,41 @@ async function handleEditAnnouncement(e) {
         const announcementRef = database.ref(`announcements/${announcementId}`);
         await announcementRef.update(announcementData);
 
+        // Check if email notification is requested
+        const checkboxValue = formData.get('sendEmailNotification');
+        const sendEmailNotification = checkboxValue !== null; // checkbox exists in formData when checked
+        console.log('Edit form - Email notification checkbox value:', checkboxValue);
+        console.log('Edit form - Send email notification?', sendEmailNotification);
+
+        // Also log all form data for debugging
+        console.log('Edit form - All form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        if (sendEmailNotification) {
+            console.log('Starting email notification process for updated announcement...');
+            showNotification('Sending email notifications...', 'info');
+
+            try {
+                const emailResult = await sendAnnouncementNotifications(announcementData);
+                if (emailResult.success) {
+                    console.log('Email notifications sent successfully');
+                    showNotification(`Announcement updated and ${emailResult.message}!`, 'success');
+                } else {
+                    console.warn('Email notifications failed:', emailResult.message);
+                    showNotification(`Announcement updated but email notifications failed: ${emailResult.message}`, 'warning');
+                }
+            } catch (emailError) {
+                console.error('Email notification error:', emailError);
+                showNotification(`Announcement updated but email notifications failed: ${emailError.message}`, 'warning');
+            }
+        } else {
+            showNotification('Announcement updated successfully!', 'success');
+        }
+
         hideLoadingSpinner();
         closeModal('editAnnouncementModal');
-        showNotification('Announcement updated successfully!', 'success');
         loadAnnouncements(); // Reload the announcements
     } catch (error) {
         hideLoadingSpinner();
