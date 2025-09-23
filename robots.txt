@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Allow search engines to crawl all pages
+Allow: /index.html
+Allow: /admin.html
+Allow: /*.css
+Allow: /*.js
+Allow: /*.jpeg
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.gif
+
+# Disallow admin areas that shouldn't be indexed
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /.netlify/
+Disallow: /netlify/functions/
+
+# Sitemap location
+Sitemap: https://sgsascouts.netlify.app/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
