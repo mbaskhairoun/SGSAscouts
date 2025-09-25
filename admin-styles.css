@@ -5049,6 +5049,98 @@ body {
     color: #2c3e50;
 }
 
+.troop-points {
+    border-top: 1px solid #e9ecef;
+    padding-top: 15px;
+    margin-bottom: 15px;
+}
+
+.points-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.points-header span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.points-header i {
+    color: #ffc107;
+}
+
+.points-count {
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 40px;
+    text-align: center;
+}
+
+.points-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.points-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+}
+
+.points-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.points-btn.add {
+    background: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.points-btn.add:hover {
+    background: #c3e6cb;
+}
+
+.points-btn.subtract {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.points-btn.subtract:hover {
+    background: #f5c6cb;
+}
+
+.points-btn.edit {
+    background: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.points-btn.edit:hover {
+    background: #bee5eb;
+}
+
 .troop-members {
     border-top: 1px solid #e9ecef;
     padding-top: 15px;

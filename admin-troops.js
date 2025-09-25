@@ -211,6 +211,24 @@ function displayTroops() {
                     </div>
                 </div>
 
+                <div class="troop-points">
+                    <div class="points-header">
+                        <span><i class="fas fa-star"></i> Points</span>
+                        <span class="points-count">${troop.points || 0}</span>
+                    </div>
+                    <div class="points-actions">
+                        <button class="points-btn add" onclick="adjustTroopPoints('${troop.id}', 1)" title="Add Point">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="points-btn subtract" onclick="adjustTroopPoints('${troop.id}', -1)" title="Remove Point">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="points-btn edit" onclick="editTroopPoints('${troop.id}')" title="Set Points">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="troop-members">
                     <div class="members-header">
                         <span><i class="fas fa-users"></i> Members</span>
@@ -348,6 +366,7 @@ async function handleAddTroop(e) {
         troopColor: formData.get('troopColor') || 'blue',
         description: formData.get('description') || '',
         members: [],
+        points: 0,
         createdAt: Date.now(),
         createdBy: 'admin'
     };
@@ -780,6 +799,68 @@ function filterAssignableScouts() {
     });
 }
 
+// Adjust troop points by a specific amount
+async function adjustTroopPoints(troopId, adjustment) {
+    try {
+        const troop = currentTroops.find(t => t.id === troopId);
+        if (!troop) return;
+
+        const currentPoints = troop.points || 0;
+        const newPoints = Math.max(0, currentPoints + adjustment); // Don't allow negative points
+
+        await adminTroopsDatabase.ref(`troops/${troopId}/points`).set(newPoints);
+
+        if (window.showNotification) {
+            const action = adjustment > 0 ? 'added to' : 'removed from';
+            window.showNotification(`Points ${action} ${troop.troopName}`, 'success');
+        }
+
+        await loadTroopsForTeam();
+
+    } catch (error) {
+        console.error('Error adjusting troop points:', error);
+        if (window.showNotification) {
+            window.showNotification('Error adjusting points', 'error');
+        }
+    }
+}
+
+// Edit troop points directly
+function editTroopPoints(troopId) {
+    const troop = currentTroops.find(t => t.id === troopId);
+    if (!troop) return;
+
+    const currentPoints = troop.points || 0;
+    const newPoints = prompt(`Set points for ${troop.troopName}:\n\nCurrent points: ${currentPoints}`, currentPoints);
+
+    if (newPoints !== null && !isNaN(newPoints)) {
+        const points = Math.max(0, parseInt(newPoints)); // Don't allow negative points
+        setTroopPoints(troopId, points);
+    }
+}
+
+// Set troop points to a specific value
+async function setTroopPoints(troopId, points) {
+    try {
+        const troop = currentTroops.find(t => t.id === troopId);
+        if (!troop) return;
+
+        await adminTroopsDatabase.ref(`troops/${troopId}/points`).set(points);
+
+        if (window.showNotification) {
+            window.showNotification(`Points set for ${troop.troopName}: ${points}`, 'success');
+        }
+
+        await loadTroopsForTeam();
+
+    } catch (error) {
+        console.error('Error setting troop points:', error);
+        if (window.showNotification) {
+            window.showNotification('Error setting points', 'error');
+        }
+    }
+}
+
 // Make functions globally available
 window.showAddTroopModal = showAddTroopModal;
 window.loadTroopsForTeam = loadTroopsForTeam;
@@ -794,6 +875,9 @@ window.selectAllScouts = selectAllScouts;
 window.deselectAllScouts = deselectAllScouts;
 window.filterAssignableScouts = filterAssignableScouts;
 window.toggleScoutSelection = toggleScoutSelection;
+window.adjustTroopPoints = adjustTroopPoints;
+window.editTroopPoints = editTroopPoints;
+window.setTroopPoints = setTroopPoints;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
