@@ -391,7 +391,7 @@ function displayAdminRSVPs() {
                                 <div class="camping-info">
                                     <div style="margin-bottom: 8px;">
                                         Acknowledgment: ${rsvp.campingDetails.paymentAcknowledged ?
-                                            '<span style="color: #27ae60;">✅ Acknowledged ($30 to Raymonda.farid@gmail.com)</span>' :
+                                            '<span style="color: #27ae60;">✅ Acknowledged ($60 to Raymonda.farid@gmail.com)</span>' :
                                             '<span style="color: #e74c3c;">❌ Not acknowledged</span>'}
                                     </div>
                                     <div class="payment-tracking">
