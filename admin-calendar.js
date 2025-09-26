@@ -129,10 +129,42 @@ function setupEventForms() {
         setTimeout(() => {
             toggleRecurringOptions(false);
         }, 100);
+
+        // Add date validation
+        setupDateValidation(addEventForm);
     }
 
     if (editEventForm) {
         editEventForm.addEventListener('submit', handleEditEvent);
+
+        // Add date validation
+        setupDateValidation(editEventForm);
+    }
+}
+
+// Setup date validation for multi-day events
+function setupDateValidation(form) {
+    const startDateField = form.querySelector('input[name="date"]');
+    const endDateField = form.querySelector('input[name="endDate"]');
+
+    if (startDateField && endDateField) {
+        function validateDates() {
+            const startDate = startDateField.value;
+            const endDate = endDateField.value;
+
+            if (startDate && endDate) {
+                if (new Date(endDate) < new Date(startDate)) {
+                    endDateField.setCustomValidity('End date cannot be before start date');
+                } else {
+                    endDateField.setCustomValidity('');
+                }
+            } else {
+                endDateField.setCustomValidity('');
+            }
+        }
+
+        startDateField.addEventListener('change', validateDates);
+        endDateField.addEventListener('change', validateDates);
     }
 }
 
@@ -225,9 +257,22 @@ function displayAdminEvents() {
             year: 'numeric'
         });
 
-        const timeStr = event.startTime && event.endTime ?
-            `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
-            event.startTime ? `${formatTime(event.startTime)}` : 'All Day';
+        // Handle multi-day events in time display
+        let timeStr;
+        if (event.endDate && event.endDate !== event.date) {
+            // Multi-day event
+            const endEventDate = parseLocalDate(event.endDate);
+            const endDateStr = endEventDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+            timeStr = `Multi-day (until ${endDateStr})`;
+        } else {
+            // Single day event
+            timeStr = event.startTime && event.endTime ?
+                `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
+                event.startTime ? `${formatTime(event.startTime)}` : 'All Day';
+        }
 
         const rsvpCount = adminCurrentRSVPs.filter(rsvp => rsvp.eventId === event.id).length;
         const attendingCount = adminCurrentRSVPs.filter(rsvp =>
@@ -611,6 +656,7 @@ function editEvent(eventId) {
         form.title.value = event.title;
         form.type.value = event.type;
         form.date.value = event.date;
+        form.endDate.value = event.endDate || '';
         form.startTime.value = event.startTime || '';
         form.endTime.value = event.endTime || '';
         form.description.value = event.description || '';
@@ -742,6 +788,7 @@ async function handleEditEvent(e) {
         title: formData.get('title'),
         type: formData.get('type'),
         date: formData.get('date'),
+        endDate: formData.get('endDate') || null,
         startTime: formData.get('startTime') || null,
         endTime: formData.get('endTime') || null,
         description: formData.get('description') || '',
@@ -1023,6 +1070,7 @@ async function createSingleEvent(formData) {
         title: formData.get('title'),
         type: formData.get('type'),
         date: correctedDate,
+        endDate: formData.get('endDate') ? formatLocalDate(parseLocalDate(formData.get('endDate'))) : null,
         startTime: formData.get('startTime') || null,
         endTime: formData.get('endTime') || null,
         description: formData.get('description') || '',

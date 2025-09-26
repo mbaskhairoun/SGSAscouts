@@ -1996,6 +1996,50 @@ function displayWeekData() {
                     </div>
                 </div>
 
+                <!-- Files & Resources -->
+                <div class="lesson-section">
+                    <div class="lesson-section-header">
+                        <h3><i class="fas fa-paperclip"></i> Files & Resources</h3>
+                        <span class="section-description">Attachments and supplementary materials</span>
+                    </div>
+                    <div class="lesson-content">
+                        ${currentWeekData.files && currentWeekData.files.length > 0 ? `
+                            <div class="files-list">
+                                ${currentWeekData.files.map(file => `
+                                    <div class="file-item">
+                                        <div class="file-info">
+                                            <i class="fas fa-file"></i>
+                                            <div class="file-details">
+                                                <a href="${file.url}" target="_blank" class="file-name">${file.filename}</a>
+                                                <small class="file-size">${file.size || 'Unknown size'}</small>
+                                            </div>
+                                        </div>
+                                        <div class="file-actions">
+                                            <button class="file-action-btn delete" onclick="deleteCurriculumFile('${file.filename}')" title="Delete file">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="empty-section">
+                                <i class="fas fa-file"></i>
+                                <p>No files uploaded for this week yet.</p>
+                                <small>Upload lesson plans, handouts, or other resources.</small>
+                            </div>
+                        `}
+                        <div class="file-upload-section">
+                            <div class="file-upload-area" id="fileUploadArea" onclick="triggerFileUpload()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h4>Upload Files</h4>
+                                <p>Click here or drag files to upload</p>
+                            </div>
+                            <input type="file" id="curriculumFileInput" multiple accept="*/*" style="display: none;" onchange="handleCurriculumFileSelect(event)">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Assessment & Reflection -->
                 <div class="lesson-section">
                     <div class="lesson-section-header">
@@ -2478,6 +2522,339 @@ function printLessonPlan() {
     printWindow.document.close();
     printWindow.print();
 }
+
+// Curriculum File Upload Functions
+function triggerFileUpload() {
+    document.getElementById('curriculumFileInput').click();
+}
+
+function handleCurriculumFileSelect(event) {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    uploadCurriculumFiles(files);
+}
+
+async function uploadCurriculumFiles(files) {
+    if (!currentProgramYear || !currentWeekNumber) {
+        showNotification('Please select a program year and week first', 'error');
+        return;
+    }
+
+    const uploadArea = document.getElementById('fileUploadArea');
+    const originalContent = uploadArea.innerHTML;
+
+    try {
+        // Show upload progress
+        uploadArea.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i>
+            <h4>Uploading files...</h4>
+            <p>Please wait while files are uploaded to GitHub</p>
+        `;
+
+        const uploadedFiles = [];
+        const team = document.getElementById('curriculumTeamSelect').value || 'scouts';
+
+        for (const file of files) {
+            try {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
+                    continue;
+                }
+
+                const filename = `curriculum/${team}/${currentProgramYear}/week${currentWeekNumber}/${file.name}`;
+                const fileUrl = await uploadCurriculumFileToGitHub(file, filename);
+
+                uploadedFiles.push({
+                    filename: file.name,
+                    url: fileUrl,
+                    size: formatFileSize(file.size),
+                    uploadDate: Date.now()
+                });
+
+            } catch (error) {
+                console.error(`Error uploading ${file.name}:`, error);
+                showNotification(`Failed to upload ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        if (uploadedFiles.length > 0) {
+            // Update the week data in Firebase
+            await saveCurriculumFiles(uploadedFiles);
+
+            // Refresh the display
+            await loadWeekData(currentWeekNumber);
+
+            showNotification(`Successfully uploaded ${uploadedFiles.length} file(s)`, 'success');
+        }
+
+    } catch (error) {
+        console.error('Error during file upload:', error);
+        showNotification('Error uploading files: ' + error.message, 'error');
+    } finally {
+        // Restore upload area
+        uploadArea.innerHTML = originalContent;
+        // Clear file input
+        document.getElementById('curriculumFileInput').value = '';
+    }
+}
+
+async function uploadCurriculumFileToGitHub(file, filename) {
+    // Get GitHub configuration (reuse existing logic)
+    let config;
+    if (window.githubTokenService) {
+        const token = await window.githubTokenService.getToken();
+        config = {
+            token: token,
+            baseUrl: 'https://api.github.com/repos/mbaskhairoun/sgsa-pics/contents'
+        };
+    } else {
+        throw new Error('GitHub token service not available');
+    }
+
+    if (!config.token || config.token === '' || config.token === 'your-github-token-here') {
+        throw new Error('GitHub token not configured');
+    }
+
+    // Convert file to base64
+    const base64Data = await curriculumFileToBase64(file);
+    const base64Content = base64Data.split(',')[1]; // Remove data prefix
+
+    // Ensure directory exists
+    const directory = filename.split('/').slice(0, -1).join('/');
+    if (directory) {
+        await ensureCurriculumDirectoryExists(directory, config);
+    }
+
+    // Upload file to GitHub
+    const response = await fetch(`${config.baseUrl}/${filename}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${config.token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+            message: `Add curriculum file: ${filename}`,
+            content: base64Content
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`GitHub API error: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.content.download_url;
+}
+
+function curriculumFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+async function ensureCurriculumDirectoryExists(directory, config) {
+    try {
+        // Check if directory exists by trying to get its contents
+        const response = await fetch(`${config.baseUrl}/${directory}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        // If directory exists, we're good
+        if (response.ok) {
+            return;
+        }
+
+        // If 404, create the directory by creating a .gitkeep file
+        if (response.status === 404) {
+            await fetch(`${config.baseUrl}/${directory}/.gitkeep`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${config.token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    message: `Create curriculum directory: ${directory}`,
+                    content: '' // Empty .gitkeep file
+                })
+            });
+        }
+    } catch (error) {
+        console.warn('Could not ensure directory exists:', error);
+        // Continue anyway - the upload might still work
+    }
+}
+
+async function saveCurriculumFiles(uploadedFiles) {
+    if (!currentProgramYear || !currentWeekNumber) return;
+
+    try {
+        const team = document.getElementById('curriculumTeamSelect').value || 'scouts';
+        const weekRef = database.ref(`curriculum/${team}/${currentProgramYear}/week${currentWeekNumber}`);
+
+        // Get existing data
+        const snapshot = await weekRef.once('value');
+        const weekData = snapshot.exists() ? snapshot.val() : getDefaultWeekData(currentWeekNumber);
+
+        // Add new files to existing files array
+        if (!weekData.files) {
+            weekData.files = [];
+        }
+        weekData.files.push(...uploadedFiles);
+
+        // Update last modified
+        weekData.lastModified = Date.now();
+        weekData.modifiedBy = currentUser.email;
+
+        // Save to Firebase
+        await weekRef.set(weekData);
+
+    } catch (error) {
+        console.error('Error saving curriculum files:', error);
+        throw error;
+    }
+}
+
+async function deleteCurriculumFile(filename) {
+    if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+        return;
+    }
+
+    try {
+        const team = document.getElementById('curriculumTeamSelect').value || 'scouts';
+
+        // Remove from Firebase
+        const weekRef = database.ref(`curriculum/${team}/${currentProgramYear}/week${currentWeekNumber}`);
+        const snapshot = await weekRef.once('value');
+
+        if (snapshot.exists()) {
+            const weekData = snapshot.val();
+            if (weekData.files) {
+                weekData.files = weekData.files.filter(file => file.filename !== filename);
+                weekData.lastModified = Date.now();
+                weekData.modifiedBy = currentUser.email;
+                await weekRef.set(weekData);
+            }
+        }
+
+        // Also try to delete from GitHub (optional - may fail if file doesn't exist)
+        try {
+            await deleteCurriculumFileFromGitHub(filename, team);
+        } catch (error) {
+            console.warn('Could not delete from GitHub:', error);
+            // Continue anyway - file was removed from Firebase
+        }
+
+        // Refresh display
+        await loadWeekData(currentWeekNumber);
+        showNotification('File deleted successfully', 'success');
+
+    } catch (error) {
+        console.error('Error deleting curriculum file:', error);
+        showNotification('Error deleting file: ' + error.message, 'error');
+    }
+}
+
+async function deleteCurriculumFileFromGitHub(filename, team) {
+    // Get GitHub configuration
+    let config;
+    if (window.githubTokenService) {
+        const token = await window.githubTokenService.getToken();
+        config = {
+            token: token,
+            baseUrl: 'https://api.github.com/repos/mbaskhairoun/sgsa-pics/contents'
+        };
+    } else {
+        throw new Error('GitHub token service not available');
+    }
+
+    const fullPath = `curriculum/${team}/${currentProgramYear}/week${currentWeekNumber}/${filename}`;
+
+    // Get file SHA (required for deletion)
+    const getResponse = await fetch(`${config.baseUrl}/${fullPath}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `token ${config.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    });
+
+    if (!getResponse.ok) {
+        throw new Error('File not found on GitHub');
+    }
+
+    const fileData = await getResponse.json();
+
+    // Delete the file
+    const deleteResponse = await fetch(`${config.baseUrl}/${fullPath}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `token ${config.token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+            message: `Delete curriculum file: ${filename}`,
+            sha: fileData.sha
+        })
+    });
+
+    if (!deleteResponse.ok) {
+        const errorText = await deleteResponse.text();
+        throw new Error(`GitHub delete error: ${deleteResponse.status} - ${errorText}`);
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Set up drag and drop for file upload area
+function initializeCurriculumFileUpload() {
+    const uploadArea = document.getElementById('fileUploadArea');
+    if (!uploadArea) return;
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            uploadCurriculumFiles(files);
+        }
+    });
+}
+
+// Initialize when curriculum is loaded
+const originalLoadWeekData = loadWeekData;
+loadWeekData = async function(weekNumber) {
+    await originalLoadWeekData.call(this, weekNumber);
+    // Initialize file upload after content is loaded
+    setTimeout(initializeCurriculumFileUpload, 100);
+};
 
 // Bulk Import Functions
 let importData = [];

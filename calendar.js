@@ -245,10 +245,30 @@ function getEventsForDate(date) {
     const events = [];
     const dateStr = date.toISOString().split('T')[0];
 
-    // Get all events from Firebase for this date (including meetings)
+    // Get all events from Firebase for this date (including meetings and multi-day events)
     currentEvents.forEach(event => {
-        if (event.date === dateStr) {
-            events.push(event);
+        const eventStartDate = event.date;
+        const eventEndDate = event.endDate || event.date;
+
+        // Check if the date falls within the event's date range
+        if (dateStr >= eventStartDate && dateStr <= eventEndDate) {
+            // Clone the event and add display info for multi-day events
+            const eventForDate = { ...event };
+
+            // Mark if this is the start, middle, or end of a multi-day event
+            if (event.endDate && event.endDate !== event.date) {
+                if (dateStr === eventStartDate) {
+                    eventForDate.dayType = 'start';
+                } else if (dateStr === eventEndDate) {
+                    eventForDate.dayType = 'end';
+                } else {
+                    eventForDate.dayType = 'middle';
+                }
+            } else {
+                eventForDate.dayType = 'single';
+            }
+
+            events.push(eventForDate);
         }
     });
 
@@ -260,10 +280,26 @@ function generateDayEvents(events) {
     return events.slice(0, 3).map(event => {
         const eventClass = event.type || 'event';
         const eventTitle = event.title || 'Event';
-        // Truncate long titles for display
-        const displayTitle = eventTitle.length > 20 ? eventTitle.substring(0, 17) + '...' : eventTitle;
 
-        return `<div class="event-item ${eventClass}" title="${eventTitle}">
+        // Adjust title display for multi-day events
+        let displayTitle;
+        if (event.dayType === 'start') {
+            displayTitle = eventTitle.length > 15 ? eventTitle.substring(0, 12) + '...' : eventTitle;
+            displayTitle += ' (starts)';
+        } else if (event.dayType === 'end') {
+            displayTitle = eventTitle.length > 15 ? eventTitle.substring(0, 12) + '...' : eventTitle;
+            displayTitle += ' (ends)';
+        } else if (event.dayType === 'middle') {
+            displayTitle = eventTitle.length > 15 ? eventTitle.substring(0, 12) + '...' : eventTitle;
+            displayTitle += ' (cont.)';
+        } else {
+            // Single day event
+            displayTitle = eventTitle.length > 20 ? eventTitle.substring(0, 17) + '...' : eventTitle;
+        }
+
+        const dayTypeClass = event.dayType || 'single';
+
+        return `<div class="event-item ${eventClass} ${dayTypeClass}" title="${eventTitle}">
             <div class="event-bar"></div>
             <div class="event-title">${displayTitle}</div>
         </div>`;
@@ -377,9 +413,21 @@ function loadUpcomingEvents() {
             day: 'numeric'
         });
 
-        const timeStr = event.startTime ?
-            `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
-            'All Day';
+        let timeStr;
+        if (event.endDate && event.endDate !== event.date) {
+            // Multi-day event
+            const endEventDate = new Date(event.endDate + 'T00:00:00');
+            const endDateStr = endEventDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+            timeStr = `Multi-day event (ends ${endDateStr})`;
+        } else {
+            // Single day event
+            timeStr = event.startTime ?
+                `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
+                'All Day';
+        }
 
         // Check RSVP status for this event
         const userRSVP = getUserRSVPForEvent(event.id);
@@ -564,7 +612,8 @@ function openRSVPModal(eventIdOrObject) {
     selectedEvent = event;
 
     // Populate modal with event details
-    const eventDate = new Date(event.date);
+    // Fix timezone offset issue by creating date in local timezone
+    const eventDate = new Date(event.date + 'T00:00:00');
     const dateStr = eventDate.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
@@ -572,13 +621,34 @@ function openRSVPModal(eventIdOrObject) {
         year: 'numeric'
     });
 
-    const timeStr = event.startTime ?
-        `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
-        'All Day';
+    let timeStr;
+    let fullDateStr;
+
+    if (event.endDate && event.endDate !== event.date) {
+        // Multi-day event
+        const endEventDate = new Date(event.endDate + 'T00:00:00');
+        const endDateStr = endEventDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        fullDateStr = `${dateStr} through ${endDateStr}`;
+        timeStr = event.startTime ? `Starts at ${formatTime(event.startTime)}` : 'All Day';
+    } else {
+        // Single day event
+        fullDateStr = dateStr;
+        timeStr = event.startTime ?
+            `${formatTime(event.startTime)} - ${formatTime(event.endTime)}` :
+            'All Day';
+    }
 
     document.getElementById('rsvpEventTitle').textContent = `RSVP for ${event.title}`;
     document.getElementById('rsvpEventName').textContent = event.title;
-    document.getElementById('rsvpEventDate').textContent = `${dateStr} at ${timeStr}`;
+    document.getElementById('rsvpEventDate').textContent = event.endDate && event.endDate !== event.date ?
+        `${fullDateStr}, ${timeStr}` :
+        `${fullDateStr} at ${timeStr}`;
     document.getElementById('rsvpEventDescription').textContent = event.description || 'Join us for this scout activity!';
 
     // Reset form
