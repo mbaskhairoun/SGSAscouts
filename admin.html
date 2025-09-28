@@ -1696,19 +1696,25 @@
                         <div class="upload-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
-                        <h4>Drop photo here or click to browse</h4>
-                        <p>Supports JPG, PNG, GIF up to 10MB</p>
-                        <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
+                        <h4>Drop photos here or click to browse</h4>
+                        <p>Supports JPG, PNG, GIF up to 10MB each. Select multiple files to upload at once.</p>
+                        <input type="file" id="photoFileInput" accept="image/*" multiple style="display: none;">
                         <button type="button" class="browse-btn" onclick="document.getElementById('photoFileInput').click()">
                             <i class="fas fa-folder-open"></i>
                             Browse Files
                         </button>
                     </div>
-                    <div class="photo-preview" id="photoPreview" style="display: none;">
-                        <img id="previewImage" src="" alt="Preview">
-                        <button type="button" class="remove-photo-btn" onclick="removePhotoPreview()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="photos-preview" id="photosPreview" style="display: none;">
+                        <div class="selected-photos-header">
+                            <h4>Selected Photos</h4>
+                            <button type="button" class="clear-all-btn" onclick="clearAllPhotos()">
+                                <i class="fas fa-trash"></i>
+                                Clear All
+                            </button>
+                        </div>
+                        <div class="photos-grid" id="photosGrid">
+                            <!-- Photo previews will be added here -->
+                        </div>
                     </div>
                 </div>
 

@@ -4,7 +4,10 @@
       "Bash(python:*)",
       "Bash(findstr:*)",
       "Bash(powershell:*)",
-      "Bash(start admin.html)"
+      "Bash(start admin.html)",
+      "Bash(start gallery.html)",
+      "Bash(copy gallery.html gallery-backup.html)",
+      "Bash(copy gallery-page.js gallery-page-backup.js)"
     ],
     "deny": [],
     "ask": []

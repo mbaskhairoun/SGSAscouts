@@ -244,6 +244,11 @@ function setupPhotoUpload() {
     const uploadZone = document.getElementById('photoUploadZone');
     const fileInput = document.getElementById('photoFileInput');
 
+    // Check if already set up to prevent duplicate event listeners
+    if (uploadZone.dataset.setupComplete === 'true') {
+        return;
+    }
+
     // Drag and drop events
     uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -259,69 +264,186 @@ function setupPhotoUpload() {
         uploadZone.classList.remove('drag-over');
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            handlePhotoSelection(files[0]);
+            handleMultiplePhotoSelection(files);
         }
     });
 
-    uploadZone.addEventListener('click', () => {
+    uploadZone.addEventListener('click', (e) => {
+        // Prevent double-clicking issues
+        if (e.detail > 1) return;
         fileInput.click();
     });
 
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handlePhotoSelection(e.target.files[0]);
+            handleMultiplePhotoSelection(e.target.files);
+            // Clear the input so the same files can be selected again if needed
+            e.target.value = '';
         }
+    });
+
+    // Mark as set up
+    uploadZone.dataset.setupComplete = 'true';
+}
+
+// Handle multiple photo selection
+function handleMultiplePhotoSelection(files) {
+    const validFiles = [];
+    const errors = [];
+
+    // Validate each file
+    Array.from(files).forEach((file, index) => {
+        if (!file.type.startsWith('image/')) {
+            errors.push(`File ${index + 1}: Please select an image file`);
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            errors.push(`File ${index + 1}: File size must be less than 10MB`);
+            return;
+        }
+
+        validFiles.push(file);
+    });
+
+    // Show errors if any
+    if (errors.length > 0) {
+        showNotification(errors.join('\n'), 'error');
+    }
+
+    // If no valid files, return
+    if (validFiles.length === 0) {
+        return;
+    }
+
+    // Store files for upload
+    const form = document.getElementById('addPhotoForm');
+    if (!form.selectedFiles) {
+        form.selectedFiles = [];
+    }
+
+    // Add new files to existing selection
+    form.selectedFiles.push(...validFiles);
+
+    // Show previews
+    displayPhotoPreviews();
+}
+
+// Handle single photo selection (for backward compatibility)
+function handlePhotoSelection(file) {
+    handleMultiplePhotoSelection([file]);
+}
+
+// Display photo previews
+function displayPhotoPreviews() {
+    const form = document.getElementById('addPhotoForm');
+    const selectedFiles = form.selectedFiles || [];
+
+    if (selectedFiles.length === 0) {
+        showUploadZone();
+        return;
+    }
+
+    const photosPreview = document.getElementById('photosPreview');
+    const photosGrid = document.getElementById('photosGrid');
+    const uploadZone = document.getElementById('photoUploadZone');
+
+    // Show preview area, hide upload zone
+    photosPreview.style.display = 'block';
+    uploadZone.style.display = 'none';
+
+    // Clear existing previews
+    photosGrid.innerHTML = '';
+
+    // Create preview elements for each file
+    selectedFiles.forEach((file, index) => {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'photo-preview-item';
+        previewDiv.id = `preview-${index}`;
+
+        previewDiv.innerHTML = `
+            <div class="preview-image-container">
+                <img class="preview-image" alt="Preview" style="opacity: 0;">
+                <div class="preview-overlay">
+                    <button type="button" class="remove-photo-btn" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="preview-info">
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">${formatFileSize(file.size)}</span>
+            </div>
+        `;
+
+        // Append to grid
+        photosGrid.appendChild(previewDiv);
+
+        // Load and display the image
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = previewDiv.querySelector('.preview-image');
+            img.src = e.target.result;
+            img.style.opacity = '1';
+        };
+        reader.readAsDataURL(file);
     });
 }
 
-// Handle photo selection
-function handlePhotoSelection(file) {
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        showNotification('Please select an image file', 'error');
-        return;
+// Remove photo from selection
+function removePhotoFromSelection(index) {
+    const form = document.getElementById('addPhotoForm');
+    if (form.selectedFiles && form.selectedFiles[index] !== undefined) {
+        form.selectedFiles.splice(index, 1);
+        displayPhotoPreviews();
     }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-        showNotification('File size must be less than 10MB', 'error');
-        return;
-    }
-
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const previewImage = document.getElementById('previewImage');
-        const photoPreview = document.getElementById('photoPreview');
-        const uploadZone = document.getElementById('photoUploadZone');
-
-        previewImage.src = e.target.result;
-        photoPreview.style.display = 'block';
-        uploadZone.style.display = 'none';
-
-        // Store the file for upload
-        document.getElementById('addPhotoForm').selectedFile = file;
-    };
-    reader.readAsDataURL(file);
 }
 
-// Remove photo preview
-function removePhotoPreview() {
-    const photoPreview = document.getElementById('photoPreview');
+// Clear all selected photos
+function clearAllPhotos() {
+    const form = document.getElementById('addPhotoForm');
+    form.selectedFiles = [];
+    showUploadZone();
+}
+
+// Show upload zone
+function showUploadZone() {
+    const photosPreview = document.getElementById('photosPreview');
     const uploadZone = document.getElementById('photoUploadZone');
 
-    photoPreview.style.display = 'none';
+    photosPreview.style.display = 'none';
     uploadZone.style.display = 'flex';
+}
 
-    // Clear the selected file
-    delete document.getElementById('addPhotoForm').selectedFile;
-    document.getElementById('photoFileInput').value = '';
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Remove photo preview (legacy function - now redirects to clearAllPhotos)
+function removePhotoPreview() {
+    clearAllPhotos();
 }
 
 // Reset photo form
 function resetPhotoForm() {
-    document.getElementById('addPhotoForm').reset();
-    removePhotoPreview();
+    const form = document.getElementById('addPhotoForm');
+    const uploadZone = document.getElementById('photoUploadZone');
+
+    form.reset();
+    form.selectedFiles = [];
+    document.getElementById('photoFileInput').value = '';
+
+    // Reset the setup flag so the upload zone can be re-initialized
+    if (uploadZone) {
+        uploadZone.dataset.setupComplete = 'false';
+    }
+
+    showUploadZone();
     hideUploadProgress();
 }
 
@@ -350,59 +472,82 @@ async function handlePhotoUpload(event) {
 
     const form = event.target;
     const formData = new FormData(form);
-    const selectedFile = form.selectedFile;
+    const selectedFiles = form.selectedFiles || [];
 
-    if (!selectedFile) {
-        showNotification('Please select a photo to upload', 'error');
+    if (!selectedFiles || selectedFiles.length === 0) {
+        showNotification('Please select photos to upload', 'error');
         return;
     }
 
     try {
         showUploadProgress();
-        updateUploadProgress(10, 'Preparing upload...');
+        updateUploadProgress(5, 'Preparing uploads...');
 
-        // Generate filename
-        const filename = generateFilename(selectedFile.name, formData.get('category'));
+        const totalFiles = selectedFiles.length;
+        let uploadedCount = 0;
+        const errors = [];
 
-        updateUploadProgress(30, 'Uploading to GitHub...');
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
 
-        // Upload to GitHub
-        const githubUrl = await uploadToGitHub(selectedFile, filename);
+            try {
+                // Update progress
+                const progressPercent = 5 + (i / totalFiles) * 85; // 5% to 90%
+                updateUploadProgress(progressPercent, `Uploading ${i + 1} of ${totalFiles}: ${file.name}`);
 
-        updateUploadProgress(70, 'Saving to database...');
+                // Generate filename
+                const filename = generateFilename(file.name, formData.get('category'));
 
-        // Save to Firebase
-        const photoData = {
-            title: formData.get('title'),
-            description: formData.get('description') || '',
-            category: formData.get('category'),
-            githubUrl: githubUrl,
-            filename: filename,
-            uploadDate: Date.now(),
-            active: formData.get('active') === 'true',
-            adminId: getCurrentUser()?.uid || 'admin'
-        };
+                // Upload to GitHub
+                const githubUrl = await uploadToGitHub(file, filename);
 
-        // Save to Firebase
-        const database = window.adminDatabase || window.firebase?.database?.() || null;
-        if (database) {
-            const photosRef = database.ref('gallery/photos');
-            await photosRef.push(photoData);
-        } else {
-            throw new Error('Firebase database not available');
+                // Prepare photo data
+                const photoData = {
+                    title: totalFiles === 1 ? formData.get('title') : `${formData.get('title')} - ${i + 1}`,
+                    description: formData.get('description') || '',
+                    category: formData.get('category'),
+                    githubUrl: githubUrl,
+                    filename: filename,
+                    uploadDate: Date.now() + i, // Add small offset to maintain order
+                    active: formData.get('active') === 'true',
+                    adminId: getCurrentUser()?.uid || 'admin'
+                };
+
+                // Save to Firebase
+                const database = window.adminDatabase || window.firebase?.database?.() || null;
+                if (database) {
+                    const photosRef = database.ref('gallery/photos');
+                    await photosRef.push(photoData);
+                    uploadedCount++;
+                } else {
+                    throw new Error('Firebase database not available');
+                }
+
+            } catch (fileError) {
+                console.error(`Error uploading ${file.name}:`, fileError);
+                errors.push(`${file.name}: ${fileError.message}`);
+            }
         }
 
-        updateUploadProgress(100, 'Upload complete!');
+        updateUploadProgress(100, 'Uploads complete!');
 
         setTimeout(() => {
             closeModal('addPhotoModal');
-            showNotification('Photo uploaded successfully!', 'success');
+
+            if (errors.length === 0) {
+                showNotification(`All ${uploadedCount} photos uploaded successfully!`, 'success');
+            } else if (uploadedCount > 0) {
+                showNotification(`${uploadedCount} photos uploaded successfully. ${errors.length} failed:\n${errors.join('\n')}`, 'warning');
+            } else {
+                showNotification(`Upload failed:\n${errors.join('\n')}`, 'error');
+            }
+
             loadAdminGallery();
         }, 1000);
 
     } catch (error) {
-        console.error('Error uploading photo:', error);
-        showNotification('Error uploading photo: ' + error.message, 'error');
+        console.error('Error during upload process:', error);
+        showNotification('Error during upload process: ' + error.message, 'error');
         hideUploadProgress();
     }
 }
@@ -718,6 +863,18 @@ function initializePhotoGallery() {
     const editPhotoForm = document.getElementById('editPhotoForm');
     if (editPhotoForm) {
         editPhotoForm.addEventListener('submit', handlePhotoEdit);
+    }
+
+    // Setup event delegation for remove photo buttons
+    const photosGrid = document.getElementById('photosGrid');
+    if (photosGrid) {
+        photosGrid.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-photo-btn')) {
+                const button = e.target.closest('.remove-photo-btn');
+                const index = parseInt(button.getAttribute('data-index'));
+                removePhotoFromSelection(index);
+            }
+        });
     }
 
     // Wait for Firebase to be initialized before loading gallery

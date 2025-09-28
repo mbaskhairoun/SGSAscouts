@@ -131,7 +131,7 @@
                     <li><a href="#announcements-feed">Announcements</a></li>
                     <li><a href="#calendar">Calendar</a></li>
                     <li><a href="#about">About</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="#contact">Contact</a></li>
                     <li><a href="#join">Join Us</a></li>
                     <li><a href="admin.html" class="admin-link" title="Admin Dashboard">
@@ -488,42 +488,26 @@
         </section>
 
 
-        <section id="gallery" class="gallery">
+        <section id="gallery" class="gallery-preview">
             <div class="container">
                 <h2>Photo Gallery</h2>
                 <p class="gallery-intro">Explore our scouts in action! Browse photos from meetings, activities, and special events.</p>
 
-                <div class="gallery-filters">
-                    <button class="filter-btn active" data-category="all">
-                        <i class="fas fa-th"></i>
-                        All Photos
-                    </button>
-                    <button class="filter-btn" data-category="cubs">
-                        <i class="fas fa-baby"></i>
-                        Cubs & Brownies
-                    </button>
-                    <button class="filter-btn" data-category="scouts">
-                        <i class="fas fa-child"></i>
-                        Scouts
-                    </button>
-                    <button class="filter-btn" data-category="rovers">
-                        <i class="fas fa-user-graduate"></i>
-                        Rovers
-                    </button>
-                    <button class="filter-btn" data-category="events">
-                        <i class="fas fa-calendar-star"></i>
-                        Events
-                    </button>
-                    <button class="filter-btn" data-category="activities">
-                        <i class="fas fa-anchor"></i>
-                        Activities
-                    </button>
-                </div>
+                <div class="gallery-preview-content">
+                    <div class="gallery-preview-grid" id="galleryPreviewGrid">
+                        <div class="gallery-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading recent photos...</p>
+                        </div>
+                    </div>
 
-                <div class="gallery-grid" id="galleryGrid">
-                    <div class="gallery-loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading photos...</p>
+                    <div class="gallery-cta">
+                        <h3>Discover More Photos</h3>
+                        <p>View our complete photo collection with enhanced browsing, sorting, and navigation features.</p>
+                        <a href="gallery.html" class="gallery-link-btn">
+                            <i class="fas fa-images"></i>
+                            View Full Gallery
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1261,57 +1245,51 @@
             }, 100);
         }
 
-        // Photo Gallery Functions
-        let currentGalleryFilter = 'all';
-        let galleryPhotos = [];
+        // Photo Gallery Preview Functions (Home Page)
+        let galleryPreviewPhotos = [];
 
-        // Load photo gallery from Firebase
+        // Load photo gallery preview from Firebase (show only recent 6 photos)
         async function loadPhotoGallery() {
             if (!announcementsDatabase) {
-                console.warn('Firebase not initialized for gallery');
+                console.warn('Firebase not initialized for gallery preview');
                 return;
             }
 
             try {
                 const galleryRef = announcementsDatabase.ref('gallery/photos');
-                const snapshot = await galleryRef.orderByChild('uploadDate').once('value');
+                const snapshot = await galleryRef.orderByChild('uploadDate').limitToLast(8).once('value');
 
-                galleryPhotos = [];
+                galleryPreviewPhotos = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(childSnapshot => {
                         const photo = childSnapshot.val();
-                        if (photo.active) {
-                            galleryPhotos.push({
+                        if (photo.active) { // Only show active photos
+                            galleryPreviewPhotos.push({
                                 id: childSnapshot.key,
                                 ...photo
                             });
                         }
                     });
 
-                    // Sort by upload date (newest first)
-                    galleryPhotos.sort((a, b) => (b.uploadDate || 0) - (a.uploadDate || 0));
+                    // Sort by upload date (newest first) and take only 6
+                    galleryPreviewPhotos.sort((a, b) => (b.uploadDate || 0) - (a.uploadDate || 0));
+                    galleryPreviewPhotos = galleryPreviewPhotos.slice(0, 6);
                 }
 
-                displayGallery();
-                setupGalleryFilters();
+                displayGalleryPreview();
             } catch (error) {
-                console.error('Error loading gallery:', error);
-                displayGallery([]);
+                console.error('Error loading gallery preview:', error);
+                displayGalleryPreview([]);
             }
         }
 
-        // Display gallery photos
-        function displayGallery() {
-            const galleryGrid = document.getElementById('galleryGrid');
+        // Display gallery preview (simplified for home page)
+        function displayGalleryPreview() {
+            const galleryGrid = document.getElementById('galleryPreviewGrid');
 
-            // Filter photos based on current filter
-            const filteredPhotos = currentGalleryFilter === 'all'
-                ? galleryPhotos
-                : galleryPhotos.filter(photo => photo.category === currentGalleryFilter);
-
-            if (filteredPhotos.length === 0) {
+            if (!galleryPreviewPhotos || galleryPreviewPhotos.length === 0) {
                 galleryGrid.innerHTML = `
-                    <div class="gallery-empty">
+                    <div class="gallery-loading">
                         <i class="fas fa-camera"></i>
                         <h3>No Photos Yet</h3>
                         <p>Check back soon for photos from our scout activities!</p>
@@ -1320,10 +1298,10 @@
                 return;
             }
 
-            galleryGrid.innerHTML = filteredPhotos.map(photo => {
+            galleryGrid.innerHTML = galleryPreviewPhotos.map(photo => {
                 const uploadDate = new Date(photo.uploadDate).toLocaleDateString('en-US', {
                     year: 'numeric',
-                    month: 'long',
+                    month: 'short',
                     day: 'numeric'
                 });
 
@@ -1334,14 +1312,14 @@
                             <div class="gallery-overlay">
                                 <div class="gallery-info">
                                     <h4 class="gallery-title">${photo.title}</h4>
-                                    <p class="gallery-description">${photo.description}</p>
+                                    <p class="gallery-description">${photo.description || ''}</p>
                                     <span class="gallery-date">
                                         <i class="fas fa-calendar"></i>
                                         ${uploadDate}
                                     </span>
                                 </div>
-                                <button class="gallery-expand" onclick="openImageModal('${photo.id}')">
-                                    <i class="fas fa-expand"></i>
+                                <button class="gallery-expand" onclick="window.open('gallery.html', '_blank')">
+                                    <i class="fas fa-external-link-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -1354,24 +1332,6 @@
             }).join('');
         }
 
-        // Setup gallery filter buttons
-        function setupGalleryFilters() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-
-                    // Add active class to clicked button
-                    this.classList.add('active');
-
-                    // Update current filter and display
-                    currentGalleryFilter = this.getAttribute('data-category');
-                    displayGallery();
-                });
-            });
-        }
 
         // Get category icon
         function getCategoryIcon(category) {
@@ -1397,41 +1357,6 @@
             return names[category] || 'Gallery';
         }
 
-        // Open image in modal (basic implementation)
-        function openImageModal(photoId) {
-            const photo = galleryPhotos.find(p => p.id === photoId);
-            if (!photo) return;
-
-            // Create modal
-            const modal = document.createElement('div');
-            modal.className = 'image-modal';
-            modal.innerHTML = `
-                <div class="modal-backdrop" onclick="closeImageModal()"></div>
-                <div class="modal-content">
-                    <button class="modal-close" onclick="closeImageModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                    <img src="${photo.githubUrl}" alt="${photo.title}" class="modal-image">
-                    <div class="modal-info">
-                        <h3>${photo.title}</h3>
-                        <p>${photo.description}</p>
-                        <span class="modal-category">${getCategoryName(photo.category)}</span>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close image modal
-        function closeImageModal() {
-            const modal = document.querySelector('.image-modal');
-            if (modal) {
-                modal.remove();
-                document.body.style.overflow = '';
-            }
-        }
 
         // Join Us Form Functionality
         document.addEventListener('DOMContentLoaded', function() {
