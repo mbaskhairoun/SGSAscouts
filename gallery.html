@@ -348,6 +348,7 @@
             font-size: 1.5rem;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
         .modal-nav:hover {
@@ -385,30 +386,6 @@
             backdrop-filter: blur(10px);
         }
 
-        .modal-info {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 80%;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-info h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.2rem;
-        }
-
-        .modal-info p {
-            margin: 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
@@ -429,6 +406,39 @@
             .gallery-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
                 gap: 1rem;
+            }
+
+            /* Mobile modal adjustments */
+            .modal-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .modal-nav.prev {
+                left: 10px;
+            }
+
+            .modal-nav.next {
+                right: 10px;
+            }
+
+            .modal-controls {
+                top: 10px;
+                right: 10px;
+            }
+
+            .modal-close {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .modal-counter {
+                top: 10px;
+                left: 10px;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -547,11 +557,6 @@
             <button class="modal-nav next" id="nextBtn" onclick="nextImage()">
                 <i class="fas fa-chevron-right"></i>
             </button>
-
-            <div class="modal-info" id="modalInfo">
-                <h3 id="modalTitle"></h3>
-                <p id="modalDescription"></p>
-            </div>
         </div>
     </div>
 

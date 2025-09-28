@@ -238,19 +238,14 @@ function updateModalContent() {
     if (!filteredPhotos[currentModalIndex]) return;
 
     const photo = filteredPhotos[currentModalIndex];
-    const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDescription = document.getElementById('modalDescription');
     const modalCounter = document.getElementById('modalCounter');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
 
-    if (modalImage && modalTitle && modalDescription && modalCounter) {
+    if (modalImage && modalCounter) {
         modalImage.src = photo.githubUrl;
         modalImage.alt = photo.title;
-        modalTitle.textContent = photo.title;
-        modalDescription.textContent = photo.description || 'No description available';
         modalCounter.textContent = `${currentModalIndex + 1} / ${filteredPhotos.length}`;
 
         // Update navigation buttons
