@@ -188,6 +188,18 @@
         .radios label { display: flex; align-items: center; gap: 6px; font-weight: 400; font-size: 14px; }
         .radios input { accent-color: var(--blue); width: 16px; height: 16px; }
 
+        .pay-box {
+            background: var(--field);
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--blue);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            display: grid;
+            gap: 4px;
+        }
+        .pay-addr { font-weight: 600; color: var(--blue); overflow-wrap: anywhere; user-select: all; }
+        .muted-note { color: var(--muted); font-size: 13px; }
         .total {
             display: flex; justify-content: space-between; align-items: baseline;
             border-top: 1px solid var(--line);
@@ -376,6 +388,7 @@
                 <span class="step-num">5</span>
                 <h2>Payment</h2>
             </div>
+            <p class="step-sub" style="margin:0">The camp fee is <strong>$60 per Scout</strong>, payable by <strong>cash</strong> or <strong>Interac e-Transfer</strong>.</p>
             <div class="field">
                 <span class="label">How will you pay? <span class="req">*</span></span>
                 <div class="radios" id="paymentGroup">
@@ -383,10 +396,21 @@
                     <label><input type="radio" name="payment" value="cash"> Cash at drop-off</label>
                 </div>
             </div>
+            <div class="pay-box" id="etransferBox" hidden>
+                <div><strong>Send your e-Transfer to:</strong> <span class="pay-addr">Raymonda.farid@gmail.com</span></div>
+                <div class="muted-note">Put your Scout's name in the e-Transfer message so we can match your payment.</div>
+            </div>
+            <div class="pay-box" id="cashBox" hidden>
+                <strong>Bring cash at drop-off</strong> on Saturday, October 17 at 7:00 AM and hand it to a leader.
+            </div>
             <div class="total">
                 <span id="totalLabel">1 Scout × $60</span>
                 <strong id="totalAmount">$60</strong>
             </div>
+            <label class="check">
+                <input type="checkbox" id="cPayment">
+                <span>I understand that <strong>registration is not complete until payment is received</strong>. <span class="req">*</span></span>
+            </label>
         </section>
 
         <section class="step">
@@ -512,6 +536,10 @@
     form.addEventListener('input', e => e.target.classList.remove('invalid'));
     form.addEventListener('change', e => {
         if (e.target.type === 'radio') e.target.closest('.radios').classList.remove('invalid');
+        if (e.target.name === 'payment') {
+            $('etransferBox').hidden = e.target.value !== 'etransfer';
+            $('cashBox').hidden = e.target.value !== 'cash';
+        }
     });
 
     const val = id => $(id).value.trim();
@@ -539,6 +567,7 @@
         });
         if (!radio('payment')) { $('paymentGroup').classList.add('invalid'); problems.push('Choose a payment method.'); }
         if (!radio('photos')) { $('photoGroup').classList.add('invalid'); problems.push('Choose a photo preference.'); }
+        if (!$('cPayment').checked) problems.push('Confirm that registration is not complete until payment is received.');
         if (!$('cParticipate').checked || !$('cMedical').checked || !$('cTimes').checked) {
             problems.push('Check all three permission boxes.');
         }
@@ -585,6 +614,7 @@
                 participation: true,
                 medical: true,
                 dropoffPickup: true,
+                paymentRequired: true,
                 photos: radio('photos') === 'yes'
             },
             signature: val('signature'),
@@ -617,8 +647,13 @@
             list.appendChild(li);
         });
         const pay = document.createElement('li');
-        pay.textContent = `Amount due: $${record.amountDue} (${record.paymentMethod === 'cash' ? 'cash at drop-off' : 'Interac e-Transfer'})`;
+        pay.textContent = record.paymentMethod === 'cash'
+            ? `Amount due: $${record.amountDue} in cash at drop-off`
+            : `Amount due: $${record.amountDue} by Interac e-Transfer to Raymonda.farid@gmail.com`;
         list.appendChild(pay);
+        const note = document.createElement('li');
+        note.textContent = 'Your registration is not complete until payment is received.';
+        list.appendChild(note);
         form.hidden = true;
         $('successState').hidden = false;
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -626,6 +661,8 @@
 
     $('registerAnother').addEventListener('click', () => {
         form.reset();
+        $('etransferBox').hidden = true;
+        $('cashBox').hidden = true;
         scoutList.replaceChildren();
         addScout();
         $('successState').hidden = true;
