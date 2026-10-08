@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fall Camp Registration | SGSA Scouts</title>
+    <meta name="description" content="Register your Scout for the SGSA Scouts Fall Camp, October 17–18, 2026.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="logo.jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Layout: single centered column — event ticket header, then the form in numbered steps */
+        :root {
+            --navy: #1e3d6f;
+            --blue: #2c5aa0;
+            --red: #d32f2f;
+            --bg: #f3f6fb;
+            --surface: #ffffff;
+            --fg: #18263d;
+            --muted: #5b6b84;
+            --line: #d7dfeb;
+            --field: #fbfcfe;
+            --ok: #2e7d4f;
+            --ok-bg: #e7f4ec;
+            --err-bg: #fdecec;
+            --ticket-fg: #ffffff;
+            --display: "Playfair Display", Georgia, serif;
+            --body: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+            color-scheme: light;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --navy: #16294a;
+                --blue: #7ea6ec;
+                --red: #f07272;
+                --bg: #0e1626;
+                --surface: #152035;
+                --fg: #e6ecf6;
+                --muted: #9aa9c2;
+                --line: #2a3a57;
+                --field: #101a2c;
+                --ok: #6fcf97;
+                --ok-bg: #12301f;
+                --err-bg: #3a1717;
+                color-scheme: dark;
+            }
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--body);
+            font-size: 15px;
+            line-height: 1.55;
+        }
+        .wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 24px 16px 64px;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Ticket header */
+        .ticket {
+            background: var(--navy);
+            color: var(--ticket-fg);
+            border-radius: 14px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr auto;
+        }
+        .ticket-main { padding: 24px; display: grid; gap: 14px; min-width: 0; }
+        .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+        .brand img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #fff; }
+        .ticket h1 {
+            font-family: var(--display);
+            font-size: clamp(28px, 6vw, 40px);
+            line-height: 1.1;
+            margin: 0;
+            text-wrap: balance;
+        }
+        .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .fact { display: grid; gap: 2px; }
+        .fact-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+        .fact-value { font-weight: 600; font-size: 15px; }
+        .fact-value a { color: inherit; }
+        .ticket-stub {
+            border-left: 2px dashed rgba(255,255,255,.35);
+            padding: 24px 22px;
+            display: grid;
+            place-content: center;
+            text-align: center;
+            gap: 2px;
+        }
+        .price { font-family: var(--display); font-size: 38px; line-height: 1; }
+        .price-note { font-size: 12px; opacity: .75; }
+        .mandatory {
+            background: var(--red);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 24px;
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 560px) {
+            .ticket { grid-template-columns: 1fr; }
+            .ticket-stub { border-left: 0; border-top: 2px dashed rgba(255,255,255,.35); grid-auto-flow: column; justify-content: start; align-items: baseline; gap: 10px; padding: 16px 24px; }
+        }
+
+        /* Form */
+        form { display: grid; gap: 16px; }
+        .step {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            gap: 14px;
+        }
+        .step-head { display: flex; align-items: baseline; gap: 12px; }
+        .step-num {
+            flex: none;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: var(--surface);
+            font-weight: 600;
+            font-size: 14px;
+            display: grid; place-items: center;
+        }
+        .step h2 { margin: 0; font-size: 18px; font-weight: 600; }
+        .step-sub { margin: 0; color: var(--muted); font-size: 13px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .field { display: grid; gap: 4px; min-width: 0; }
+        label, .label { font-size: 13px; font-weight: 500; }
+        .req { color: var(--red); }
+        input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+            width: 100%;
+            font: inherit;
+            color: var(--fg);
+            background: var(--field);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        textarea { min-height: 70px; resize: vertical; }
+        input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+            outline: 2px solid var(--blue);
+            outline-offset: 1px;
+        }
+        .invalid { border-color: var(--red) !important; }
+
+        .scout-card {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 14px;
+            display: grid;
+            gap: 12px;
+        }
+        .scout-card-head { display: flex; justify-content: space-between; align-items: center; }
+        .scout-card-title { font-weight: 600; font-size: 14px; color: var(--blue); }
+        .link-btn {
+            background: none; border: 0; padding: 4px 0;
+            color: var(--red); font: inherit; font-size: 13px; cursor: pointer;
+        }
+        .add-btn {
+            justify-self: start;
+            background: none;
+            border: 1px dashed var(--blue);
+            color: var(--blue);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font: inherit; font-weight: 500; font-size: 14px;
+            cursor: pointer;
+        }
+        .add-btn:hover { background: var(--field); }
+
+        .checks { display: grid; gap: 10px; }
+        .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+        .check input { margin-top: 4px; width: 18px; height: 18px; flex: none; accent-color: var(--blue); }
+        .radios { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+        .radios label { display: flex; align-items: center; gap: 6px; font-weight: 400; font-size: 14px; }
+        .radios input { accent-color: var(--blue); width: 16px; height: 16px; }
+
+        .total {
+            display: flex; justify-content: space-between; align-items: baseline;
+            border-top: 1px solid var(--line);
+            padding-top: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+        .total strong { font-size: 22px; }
+
+        .submit {
+            background: var(--red);
+            color: #fff;
+            border: 0;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font: inherit; font-weight: 600; font-size: 16px;
+            cursor: pointer;
+        }
+        .submit:disabled { opacity: .6; cursor: wait; }
+        .form-error {
+            background: var(--err-bg);
+            color: var(--red);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .notice {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 28px 24px;
+            display: grid;
+            gap: 10px;
+        }
+        .notice h2 { font-family: var(--display); margin: 0; font-size: 26px; }
+        .notice p { margin: 0; }
+        .ref {
+            font-family: ui-monospace, Consolas, monospace;
+            background: var(--ok-bg);
+            color: var(--ok);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .summary { display: grid; gap: 4px; padding: 0; margin: 4px 0 0; list-style: none; font-size: 14px; color: var(--muted); }
+        .fineprint { color: var(--muted); font-size: 12px; text-align: center; }
+        @media (prefers-reduced-motion: no-preference) {
+            .notice { animation: rise .3s ease-out; }
+            @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="ticket">
+        <div class="ticket-main">
+            <div class="brand"><img src="logo.jpeg" alt="">SGSA Scouts</div>
+            <h1>Fall Scout Camp</h1>
+            <div class="facts">
+                <div class="fact">
+                    <span class="fact-label">Drop-off</span>
+                    <span class="fact-value">Sat, Oct 17 · 7:00 AM sharp</span>
+                </div>
+                <div class="fact">
+                    <span class="fact-label">Pickup</span>
+                    <span class="fact-value">Sun, Oct 18 · 2:00 PM</span>
+                </div>
+                <div class="fact">
+                    <span class="fact-label">Location</span>
+                    <span class="fact-value"><a href="https://maps.app.goo.gl/PVhVznBbdstSvTKH6" target="_blank" rel="noopener">Open in Google Maps</a></span>
+                </div>
+            </div>
+        </div>
+        <div class="ticket-stub">
+            <span class="price">$60</span>
+            <span class="price-note">per Scout</span>
+        </div>
+        <div class="mandatory">Camp is mandatory for all Scouts.</div>
+    </header>
+
+    <section id="loadingState" class="notice">
+        <p>Loading the registration form…</p>
+    </section>
+
+    <section id="closedState" class="notice" hidden>
+        <h2>Registration is closed</h2>
+        <p>Registration for this camp is no longer open. Please contact your Scout leaders if you still need to register.</p>
+    </section>
+
+    <section id="successState" class="notice" hidden>
+        <h2>You're registered</h2>
+        <p>Thank you! Your registration was received. Your reference number is <span class="ref" id="refCode"></span>.</p>
+        <ul class="summary" id="successSummary"></ul>
+        <p>Remember: drop-off is <strong>Saturday, October 17 at 7:00 AM sharp</strong>, and pickup is <strong>Sunday, October 18 at 2:00 PM</strong>.</p>
+        <button type="button" class="add-btn" id="registerAnother">Register another family</button>
+    </section>
+
+    <form id="campForm" novalidate hidden>
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">1</span>
+                <div>
+                    <h2>Scout information</h2>
+                    <p class="step-sub">Registering siblings? Add each Scout below.</p>
+                </div>
+            </div>
+            <div id="scoutList" class="checks"></div>
+            <button type="button" class="add-btn" id="addScout">+ Add another Scout</button>
+        </section>
+
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">2</span>
+                <h2>Parent or guardian</h2>
+            </div>
+            <div class="grid">
+                <div class="field">
+                    <label for="parentName">Full name <span class="req">*</span></label>
+                    <input type="text" id="parentName" autocomplete="name" required maxlength="100">
+                </div>
+                <div class="field">
+                    <label for="parentPhone">Phone <span class="req">*</span></label>
+                    <input type="tel" id="parentPhone" autocomplete="tel" required maxlength="30">
+                </div>
+                <div class="field">
+                    <label for="parentEmail">Email <span class="req">*</span></label>
+                    <input type="email" id="parentEmail" autocomplete="email" required maxlength="120">
+                </div>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">3</span>
+                <div>
+                    <h2>Emergency contact</h2>
+                    <p class="step-sub">Someone other than you whom we can reach during camp.</p>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="field">
+                    <label for="emName">Full name <span class="req">*</span></label>
+                    <input type="text" id="emName" required maxlength="100">
+                </div>
+                <div class="field">
+                    <label for="emRelation">Relationship <span class="req">*</span></label>
+                    <input type="text" id="emRelation" required maxlength="60" placeholder="e.g. Aunt, Grandparent">
+                </div>
+                <div class="field">
+                    <label for="emPhone">Phone <span class="req">*</span></label>
+                    <input type="tel" id="emPhone" required maxlength="30">
+                </div>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">4</span>
+                <div>
+                    <h2>Health and diet</h2>
+                    <p class="step-sub">Leave blank if none. If you registered more than one Scout, say which Scout each note applies to.</p>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="field">
+                    <label for="allergies">Allergies</label>
+                    <textarea id="allergies" maxlength="600" placeholder="Food, medication, insect stings…"></textarea>
+                </div>
+                <div class="field">
+                    <label for="dietary">Dietary needs</label>
+                    <textarea id="dietary" maxlength="600" placeholder="e.g. vegetarian, fasting, no pork"></textarea>
+                </div>
+                <div class="field">
+                    <label for="medications">Medications to take at camp</label>
+                    <textarea id="medications" maxlength="600" placeholder="Name, dose and time"></textarea>
+                </div>
+                <div class="field">
+                    <label for="conditions">Medical conditions or other notes</label>
+                    <textarea id="conditions" maxlength="600" placeholder="Asthma, EpiPen, sleepwalking, anything leaders should know"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">5</span>
+                <h2>Payment</h2>
+            </div>
+            <div class="field">
+                <span class="label">How will you pay? <span class="req">*</span></span>
+                <div class="radios" id="paymentGroup">
+                    <label><input type="radio" name="payment" value="etransfer"> Interac e-Transfer</label>
+                    <label><input type="radio" name="payment" value="cash"> Cash at drop-off</label>
+                </div>
+            </div>
+            <div class="total">
+                <span id="totalLabel">1 Scout × $60</span>
+                <strong id="totalAmount">$60</strong>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-head">
+                <span class="step-num">6</span>
+                <h2>Permissions</h2>
+            </div>
+            <div class="checks">
+                <label class="check">
+                    <input type="checkbox" id="cParticipate">
+                    <span>I give permission for my child(ren) to attend the SGSA Scouts camp on October 17–18 and take part in all camp activities. <span class="req">*</span></span>
+                </label>
+                <label class="check">
+                    <input type="checkbox" id="cMedical">
+                    <span>In an emergency, if I cannot be reached, I authorize the leaders to get medical treatment for my child(ren). <span class="req">*</span></span>
+                </label>
+                <label class="check">
+                    <input type="checkbox" id="cTimes">
+                    <span>I will drop off on <strong>October 17 at 7:00 AM</strong> and pick up on <strong>October 18 at 2:00 PM</strong>. <span class="req">*</span></span>
+                </label>
+            </div>
+            <div class="field">
+                <span class="label">Photos <span class="req">*</span></span>
+                <div class="radios" id="photoGroup">
+                    <label><input type="radio" name="photos" value="yes"> Photos of my child may be shared by SGSA Scouts</label>
+                    <label><input type="radio" name="photos" value="no"> Please do not share photos of my child</label>
+                </div>
+            </div>
+            <div class="field">
+                <label for="signature">Type your full name as your signature <span class="req">*</span></label>
+                <input type="text" id="signature" required maxlength="100">
+            </div>
+        </section>
+
+        <div class="form-error" id="formError" role="alert" hidden></div>
+        <button type="submit" class="submit" id="submitBtn">Submit registration</button>
+        <p class="fineprint">Your information is shared only with SGSA Scouts leaders for this camp.</p>
+    </form>
+</div>
+
+<template id="scoutTpl">
+    <div class="scout-card">
+        <div class="scout-card-head">
+            <span class="scout-card-title"></span>
+            <button type="button" class="link-btn remove-scout">Remove</button>
+        </div>
+        <div class="grid">
+            <div class="field">
+                <label>First name <span class="req">*</span></label>
+                <input type="text" data-k="firstName" required maxlength="60">
+            </div>
+            <div class="field">
+                <label>Last name <span class="req">*</span></label>
+                <input type="text" data-k="lastName" required maxlength="60">
+            </div>
+            <div class="field">
+                <label>Grade <span class="req">*</span></label>
+                <select data-k="grade" required>
+                    <option value="">Select grade</option>
+                    <option>3</option><option>4</option><option>5</option><option>6</option>
+                    <option>7</option><option>8</option><option>9</option><option>10</option>
+                    <option>11</option><option>12</option><option value="12+">12+</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+    const CAMP_ID = 'fall-camp-2026';
+    const PRICE = 60;
+    const firebaseConfig = {
+        apiKey: "AIzaSyATW5HErUw05Ij28L6974sR12lVO8Av_ew",
+        authDomain: "sgsa-kids.firebaseapp.com",
+        databaseURL: "https://sgsa-kids-default-rtdb.firebaseio.com",
+        projectId: "sgsa-kids",
+        storageBucket: "sgsa-kids.firebasestorage.app",
+        messagingSenderId: "988633336020",
+        appId: "1:988633336020:web:f9f2055d4dd7996ad51341"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const $ = id => document.getElementById(id);
+    const form = $('campForm');
+    const scoutList = $('scoutList');
+    const tpl = $('scoutTpl');
+    let scoutSeq = 0;
+
+    function addScout() {
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        const n = ++scoutSeq;
+        node.querySelectorAll('[data-k]').forEach(el => {
+            el.id = `scout${n}_${el.dataset.k}`;
+            el.previousElementSibling.htmlFor = el.id;
+        });
+        node.querySelector('.remove-scout').addEventListener('click', () => {
+            node.remove();
+            refreshScouts();
+        });
+        scoutList.appendChild(node);
+        refreshScouts();
+        return node;
+    }
+
+    function refreshScouts() {
+        const cards = [...scoutList.children];
+        cards.forEach((card, i) => {
+            card.querySelector('.scout-card-title').textContent = `Scout ${i + 1}`;
+            card.querySelector('.remove-scout').hidden = cards.length === 1;
+        });
+        const count = cards.length;
+        $('totalLabel').textContent = `${count} Scout${count > 1 ? 's' : ''} × $${PRICE}`;
+        $('totalAmount').textContent = `$${count * PRICE}`;
+    }
+
+    $('addScout').addEventListener('click', () => {
+        addScout().querySelector('input').focus();
+    });
+
+    form.addEventListener('input', e => e.target.classList.remove('invalid'));
+    form.addEventListener('change', e => {
+        if (e.target.type === 'radio') e.target.closest('.radios').classList.remove('invalid');
+    });
+
+    const val = id => $(id).value.trim();
+    const radio = name => (form.querySelector(`input[name="${name}"]:checked`) || {}).value || '';
+
+    function validate() {
+        const problems = [];
+        form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+        form.querySelectorAll('input[required], select[required]').forEach(el => {
+            if (!el.value.trim()) el.classList.add('invalid');
+        });
+        if (form.querySelector('.invalid')) problems.push('Fill in every field marked with *.');
+
+        const email = $('parentEmail');
+        if (email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            email.classList.add('invalid');
+            problems.push('Enter a valid email address.');
+        }
+        ['parentPhone', 'emPhone'].forEach(id => {
+            const digits = $(id).value.replace(/\D/g, '');
+            if ($(id).value.trim() && digits.length < 10) {
+                $(id).classList.add('invalid');
+                problems.push('Enter phone numbers with area code (10 digits).');
+            }
+        });
+        if (!radio('payment')) { $('paymentGroup').classList.add('invalid'); problems.push('Choose a payment method.'); }
+        if (!radio('photos')) { $('photoGroup').classList.add('invalid'); problems.push('Choose a photo preference.'); }
+        if (!$('cParticipate').checked || !$('cMedical').checked || !$('cTimes').checked) {
+            problems.push('Check all three permission boxes.');
+        }
+        return [...new Set(problems)];
+    }
+
+    function showError(messages) {
+        const box = $('formError');
+        box.textContent = messages.join(' ');
+        box.hidden = messages.length === 0;
+    }
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const problems = validate();
+        if (problems.length) {
+            showError(problems);
+            const first = form.querySelector('.invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        showError([]);
+
+        const scouts = [...scoutList.children].map(card => {
+            const s = {};
+            card.querySelectorAll('[data-k]').forEach(el => { s[el.dataset.k] = el.value.trim(); });
+            return s;
+        });
+
+        const record = {
+            scouts,
+            scoutCount: scouts.length,
+            amountDue: scouts.length * PRICE,
+            parent: { name: val('parentName'), phone: val('parentPhone'), email: val('parentEmail') },
+            emergency: { name: val('emName'), relationship: val('emRelation'), phone: val('emPhone') },
+            health: {
+                allergies: val('allergies'),
+                dietary: val('dietary'),
+                medications: val('medications'),
+                conditions: val('conditions')
+            },
+            paymentMethod: radio('payment'),
+            consents: {
+                participation: true,
+                medical: true,
+                dropoffPickup: true,
+                photos: radio('photos') === 'yes'
+            },
+            signature: val('signature'),
+            submittedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        const btn = $('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Submitting…';
+        try {
+            const ref = database.ref(`campRegistrations/${CAMP_ID}`).push();
+            await ref.set(record);
+            showSuccess(ref.key, record);
+        } catch (err) {
+            console.error('Registration failed:', err);
+            showError(['We could not save your registration. Check your internet connection and try again. If it keeps failing, please contact your Scout leaders.']);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Submit registration';
+        }
+    });
+
+    function showSuccess(key, record) {
+        $('refCode').textContent = key.slice(-6).toUpperCase();
+        const list = $('successSummary');
+        list.replaceChildren();
+        record.scouts.forEach(s => {
+            const li = document.createElement('li');
+            li.textContent = `${s.firstName} ${s.lastName} · Grade ${s.grade}`;
+            list.appendChild(li);
+        });
+        const pay = document.createElement('li');
+        pay.textContent = `Amount due: $${record.amountDue} (${record.paymentMethod === 'cash' ? 'cash at drop-off' : 'Interac e-Transfer'})`;
+        list.appendChild(pay);
+        form.hidden = true;
+        $('successState').hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    $('registerAnother').addEventListener('click', () => {
+        form.reset();
+        scoutList.replaceChildren();
+        addScout();
+        $('successState').hidden = true;
+        form.hidden = false;
+        window.scrollTo({ top: 0 });
+    });
+
+    addScout();
+
+    // Leaders can close registration from the camp admin page.
+    let settled = false;
+    function showForm(open) {
+        settled = true;
+        $('loadingState').hidden = true;
+        if ($('successState').hidden === false) return;
+        form.hidden = !open;
+        $('closedState').hidden = open;
+    }
+    database.ref(`campSettings/${CAMP_ID}/open`).on('value',
+        snap => showForm(snap.val() !== false),
+        () => showForm(true)
+    );
+    setTimeout(() => { if (!settled) showForm(true); }, 4000);
+</script>
+</body>
+</html>

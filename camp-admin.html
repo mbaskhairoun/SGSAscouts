@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camp Admin | SGSA Scouts</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="logo.jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Layout: top bar, summary strip, toolbar, then a roster table with a detail drawer */
+        :root {
+            --navy: #1e3d6f;
+            --blue: #2c5aa0;
+            --red: #d32f2f;
+            --bg: #f3f6fb;
+            --surface: #ffffff;
+            --fg: #18263d;
+            --muted: #5b6b84;
+            --line: #d7dfeb;
+            --field: #fbfcfe;
+            --row-hover: #eef3fb;
+            --ok: #2e7d4f;
+            --ok-bg: #e7f4ec;
+            --warn: #9a5b00;
+            --warn-bg: #fdf1dc;
+            --err-bg: #fdecec;
+            --display: "Playfair Display", Georgia, serif;
+            --body: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+            color-scheme: light;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --navy: #16294a;
+                --blue: #7ea6ec;
+                --red: #f07272;
+                --bg: #0e1626;
+                --surface: #152035;
+                --fg: #e6ecf6;
+                --muted: #9aa9c2;
+                --line: #2a3a57;
+                --field: #101a2c;
+                --row-hover: #1b2943;
+                --ok: #6fcf97;
+                --ok-bg: #12301f;
+                --warn: #f0b75e;
+                --warn-bg: #3a2a10;
+                --err-bg: #3a1717;
+                color-scheme: dark;
+            }
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.5; }
+        button { font: inherit; cursor: pointer; }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+        .topbar {
+            background: var(--navy); color: #fff;
+            padding: 14px 16px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        }
+        .topbar-title { display: flex; align-items: center; gap: 10px; }
+        .topbar img { width: 32px; height: 32px; border-radius: 50%; background: #fff; object-fit: cover; }
+        .topbar h1 { font-family: var(--display); font-size: 20px; margin: 0; }
+        .topbar small { display: block; opacity: .75; font-size: 12px; }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+        .ghost { background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 8px; padding: 6px 12px; }
+
+        main { max-width: 1240px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 16px; }
+
+        /* Login */
+        .login {
+            max-width: 380px; margin: 60px auto; padding: 0 16px;
+        }
+        .login-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; }
+        .login-card h2 { font-family: var(--display); margin: 0; font-size: 24px; }
+        .field { display: grid; gap: 4px; }
+        label { font-size: 13px; font-weight: 500; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="search"], select, textarea {
+            width: 100%; font: inherit; color: var(--fg); background: var(--field);
+            border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px;
+        }
+        .primary { background: var(--blue); color: var(--surface); border: 0; border-radius: 8px; padding: 10px 16px; font-weight: 600; }
+        .error { background: var(--err-bg); color: var(--red); border-radius: 8px; padding: 9px 12px; font-size: 13px; }
+
+        /* Summary strip */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+        .stat-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+        .stat-value { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .stat-sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 6px; }
+        .bar > span { display: block; height: 100%; background: var(--ok); }
+
+        /* Toolbar */
+        .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+        .toolbar-left { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1 1 320px; }
+        .toolbar-left input[type="search"] { max-width: 280px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 5px 12px; font-size: 13px; }
+        .chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--surface); }
+        .toolbar-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .secondary { background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+        .switch { display: flex; align-items: center; gap: 8px; font-size: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; }
+        .switch input { accent-color: var(--ok); width: 16px; height: 16px; }
+
+        /* Table */
+        .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 860px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+        th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--field); position: sticky; top: 0; }
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background: var(--row-hover); }
+        tbody tr:last-child td { border-bottom: 0; }
+        td.num { font-variant-numeric: tabular-nums; }
+        .name { font-weight: 600; }
+        .muted { color: var(--muted); font-size: 12px; }
+        .pill { display: inline-block; border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+        .pill.ok { background: var(--ok-bg); color: var(--ok); }
+        .pill.warn { background: var(--warn-bg); color: var(--warn); }
+        .pill.alert { background: var(--err-bg); color: var(--red); }
+        .pill.none { color: var(--muted); }
+        .toggle { border: 1px solid var(--line); background: var(--field); color: var(--muted); border-radius: 6px; padding: 3px 9px; font-size: 12px; white-space: nowrap; }
+        .toggle.on { background: var(--ok-bg); color: var(--ok); border-color: transparent; font-weight: 600; }
+        .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
+
+        /* Drawer */
+        .scrim { position: fixed; inset: 0; background: rgba(5,12,25,.45); }
+        .drawer {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: min(480px, 100%);
+            background: var(--surface); border-left: 1px solid var(--line);
+            overflow-y: auto;
+            padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+            display: grid; gap: 16px; align-content: start;
+        }
+        .drawer-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+        .drawer h2 { font-family: var(--display); margin: 0; font-size: 22px; }
+        .close { background: none; border: 0; font-size: 22px; line-height: 1; color: var(--muted); padding: 2px 6px; }
+        .section { display: grid; gap: 6px; }
+        .section h3 { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+        dl { margin: 0; display: grid; grid-template-columns: 120px 1fr; gap: 4px 12px; }
+        dt { color: var(--muted); }
+        dd { margin: 0; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+        .health-note { background: var(--warn-bg); color: var(--fg); border-radius: 8px; padding: 8px 10px; }
+        .actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .danger { background: transparent; color: var(--red); border: 1px solid var(--red); border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+        .danger.solid { background: var(--red); color: #fff; }
+        .confirm-box { background: var(--err-bg); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; }
+
+        .toast {
+            position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+            background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 8px; font-size: 13px;
+        }
+        .share { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+        .share code { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; color: var(--fg); overflow-wrap: anywhere; }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-title">
+            <img src="logo.jpeg" alt="">
+            <div>
+                <h1>Fall Camp Admin</h1>
+                <small>Oct 17–18, 2026 · $60 per Scout</small>
+            </div>
+        </div>
+        <div class="topbar-actions" id="userBar" hidden>
+            <span id="userEmail"></span>
+            <a class="ghost" href="admin.html" style="text-decoration:none">Main admin</a>
+            <button type="button" class="ghost" id="logoutBtn">Sign out</button>
+        </div>
+    </header>
+
+    <section class="login" id="loginView" hidden>
+        <form class="login-card" id="loginForm">
+            <h2>Leader sign-in</h2>
+            <p class="muted" style="margin:0">Use the same account you use for the main admin panel.</p>
+            <div class="field">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" autocomplete="username" required>
+            </div>
+            <div class="field">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" required>
+            </div>
+            <div class="error" id="loginError" hidden></div>
+            <button type="submit" class="primary" id="loginBtn">Sign in</button>
+        </form>
+    </section>
+
+    <main id="appView" hidden>
+        <div class="share">
+            Registration link for parents:
+            <code id="shareLink"></code>
+            <button type="button" class="secondary" id="copyLink">Copy link</button>
+        </div>
+
+        <section class="stats" id="stats"></section>
+
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <input type="search" id="search" placeholder="Search scout, parent, phone…" aria-label="Search registrations">
+                <div class="chips" id="filters">
+                    <button type="button" class="chip" data-f="all" aria-pressed="true">All</button>
+                    <button type="button" class="chip" data-f="unpaid" aria-pressed="false">Unpaid</button>
+                    <button type="button" class="chip" data-f="paid" aria-pressed="false">Paid</button>
+                    <button type="button" class="chip" data-f="health" aria-pressed="false">Health notes</button>
+                    <button type="button" class="chip" data-f="notin" aria-pressed="false">Not checked in</button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <label class="switch"><input type="checkbox" id="openToggle"> Registration open</label>
+                <button type="button" class="secondary" id="exportBtn">Export CSV</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scout</th>
+                        <th>Grade</th>
+                        <th>Parent</th>
+                        <th>Health</th>
+                        <th>Payment</th>
+                        <th>Photos</th>
+                        <th>Checked in</th>
+                        <th>Picked up</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
+            <div class="empty" id="emptyState" hidden></div>
+        </div>
+    </main>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="drawer" hidden aria-labelledby="drawerTitle"></aside>
+    <div class="toast" id="toast" hidden role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+    const CAMP_ID = 'fall-camp-2026';
+    const firebaseConfig = {
+        apiKey: "AIzaSyATW5HErUw05Ij28L6974sR12lVO8Av_ew",
+        authDomain: "sgsa-kids.firebaseapp.com",
+        databaseURL: "https://sgsa-kids-default-rtdb.firebaseio.com",
+        projectId: "sgsa-kids",
+        storageBucket: "sgsa-kids.firebasestorage.app",
+        messagingSenderId: "988633336020",
+        appId: "1:988633336020:web:f9f2055d4dd7996ad51341"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    const regRef = database.ref(`campRegistrations/${CAMP_ID}`);
+    const statusRef = database.ref(`campAdmin/${CAMP_ID}`);
+    const openRef = database.ref(`campSettings/${CAMP_ID}/open`);
+
+    const $ = id => document.getElementById(id);
+    let registrations = {};   // regId -> registration
+    let statuses = {};        // regId -> { paid, notes, scouts: { idx: { checkedIn, pickedUp } } }
+    let filter = 'all';
+    let openRegId = null;
+    let listeners = [];
+
+    const regLink = new URL('camp-registration.html', location.href).href;
+    $('shareLink').textContent = regLink;
+
+    // ---------- helpers ----------
+    function el(tag, props = {}, ...children) {
+        const node = document.createElement(tag);
+        Object.entries(props).forEach(([k, v]) => {
+            if (k === 'class') node.className = v;
+            else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+            else if (k === 'text') node.textContent = v;
+            else node.setAttribute(k, v);
+        });
+        children.flat().forEach(c => c != null && node.append(c));
+        return node;
+    }
+    function toast(msg) {
+        const t = $('toast');
+        t.textContent = msg;
+        t.hidden = false;
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => { t.hidden = true; }, 2600);
+    }
+    const fmtDate = ts => ts ? new Date(ts).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+    const payLabel = m => m === 'cash' ? 'Cash at drop-off' : m === 'etransfer' ? 'e-Transfer' : '—';
+    const asArray = v => Array.isArray(v) ? v : v ? Object.values(v) : [];
+    function healthText(r) {
+        const h = r.health || {};
+        return [h.allergies, h.dietary, h.medications, h.conditions].filter(Boolean).join(' ');
+    }
+    function hasAllergy(r) { return Boolean((r.health || {}).allergies); }
+
+    // One row per Scout; payment is tracked per family registration.
+    function scoutRows() {
+        const rows = [];
+        Object.entries(registrations).forEach(([id, r]) => {
+            const st = statuses[id] || {};
+            asArray(r.scouts).forEach((s, idx) => {
+                const ss = (st.scouts || {})[idx] || {};
+                rows.push({ id, idx, r, s, paid: Boolean(st.paid), checkedIn: Boolean(ss.checkedIn), pickedUp: Boolean(ss.pickedUp) });
+            });
+        });
+        return rows.sort((a, b) => (a.s.lastName || '').localeCompare(b.s.lastName || '') || (a.s.firstName || '').localeCompare(b.s.firstName || ''));
+    }
+
+    // ---------- render ----------
+    function renderStats(rows) {
+        const families = Object.keys(registrations).length;
+        const expected = Object.values(registrations).reduce((sum, r) => sum + (Number(r.amountDue) || 0), 0);
+        const collected = Object.entries(registrations).reduce((sum, [id, r]) => sum + ((statuses[id] || {}).paid ? Number(r.amountDue) || 0 : 0), 0);
+        const checkedIn = rows.filter(x => x.checkedIn).length;
+        const allergies = rows.filter(x => hasAllergy(x.r)).length;
+        const pct = expected ? Math.round(collected / expected * 100) : 0;
+
+        const stat = (label, value, sub, bar) => el('div', { class: 'stat' },
+            el('span', { class: 'stat-label', text: label }),
+            el('span', { class: 'stat-value', text: value }),
+            sub ? el('span', { class: 'stat-sub', text: sub }) : null,
+            bar != null ? el('div', { class: 'bar' }, el('span', { style: `width:${bar}%` })) : null
+        );
+        $('stats').replaceChildren(
+            stat('Scouts registered', rows.length, `${families} famil${families === 1 ? 'y' : 'ies'}`),
+            stat('Collected', `$${collected}`, `of $${expected} expected · ${pct}%`, pct),
+            stat('Outstanding', `$${expected - collected}`, `${Object.keys(registrations).filter(id => !(statuses[id] || {}).paid).length} families unpaid`),
+            stat('Checked in', `${checkedIn} / ${rows.length}`, 'at drop-off'),
+            stat('Allergies', allergies, 'Scouts with allergy notes')
+        );
+    }
+
+    function matches(x, q) {
+        if (!q) return true;
+        const hay = [x.s.firstName, x.s.lastName, x.r.parent?.name, x.r.parent?.phone, x.r.parent?.email, x.r.emergency?.name].join(' ').toLowerCase();
+        return hay.includes(q);
+    }
+
+    function render() {
+        const all = scoutRows();
+        renderStats(all);
+        const q = $('search').value.trim().toLowerCase();
+        const rows = all.filter(x => matches(x, q)).filter(x => {
+            if (filter === 'unpaid') return !x.paid;
+            if (filter === 'paid') return x.paid;
+            if (filter === 'health') return Boolean(healthText(x.r));
+            if (filter === 'notin') return !x.checkedIn;
+            return true;
+        });
+
+        $('rows').replaceChildren(...rows.map(x => {
+            const health = healthText(x.r);
+            const healthPill = hasAllergy(x.r)
+                ? el('span', { class: 'pill alert', text: 'Allergy' })
+                : health ? el('span', { class: 'pill warn', text: 'Notes' }) : el('span', { class: 'pill none', text: 'None' });
+            const tr = el('tr', { onclick: () => openDrawer(x.id) },
+                el('td', {}, el('div', { class: 'name', text: `${x.s.firstName} ${x.s.lastName}` })),
+                el('td', { class: 'num', text: x.s.grade || '—' }),
+                el('td', {}, el('div', { text: x.r.parent?.name || '—' }), el('div', { class: 'muted', text: x.r.parent?.phone || '' })),
+                el('td', {}, healthPill),
+                el('td', {},
+                    el('button', { type: 'button', class: 'toggle' + (x.paid ? ' on' : ''), title: payLabel(x.r.paymentMethod),
+                        onclick: e => { e.stopPropagation(); setPaid(x.id, !x.paid); } },
+                        x.paid ? `Paid $${x.r.amountDue}` : `Unpaid $${x.r.amountDue}`),
+                    el('div', { class: 'muted', text: payLabel(x.r.paymentMethod) })
+                ),
+                el('td', {}, el('span', { class: 'pill ' + (x.r.consents?.photos ? 'ok' : 'alert'), text: x.r.consents?.photos ? 'OK' : 'No photos' })),
+                el('td', {}, el('button', { type: 'button', class: 'toggle' + (x.checkedIn ? ' on' : ''),
+                    onclick: e => { e.stopPropagation(); setScoutFlag(x.id, x.idx, 'checkedIn', !x.checkedIn); } }, x.checkedIn ? 'Checked in' : 'Check in')),
+                el('td', {}, el('button', { type: 'button', class: 'toggle' + (x.pickedUp ? ' on' : ''),
+                    onclick: e => { e.stopPropagation(); setScoutFlag(x.id, x.idx, 'pickedUp', !x.pickedUp); } }, x.pickedUp ? 'Picked up' : 'Mark picked up')),
+                el('td', { class: 'muted', text: fmtDate(x.r.submittedAt) })
+            );
+            return tr;
+        }));
+
+        const empty = $('emptyState');
+        empty.hidden = rows.length > 0;
+        empty.textContent = all.length === 0
+            ? `No registrations yet. Share the registration link with parents and new sign-ups will appear here as they come in.`
+            : 'No Scouts match this search or filter.';
+
+        if (openRegId) renderDrawer();
+    }
+
+    // ---------- drawer ----------
+    function openDrawer(id) {
+        openRegId = id;
+        $('scrim').hidden = false;
+        $('drawer').hidden = false;
+        renderDrawer();
+        $('drawer').querySelector('.close').focus();
+    }
+    function closeDrawer() {
+        openRegId = null;
+        $('scrim').hidden = true;
+        $('drawer').hidden = true;
+    }
+    function dlRows(pairs) {
+        return el('dl', {}, pairs.flatMap(([k, v]) => [el('dt', { text: k }), el('dd', { text: v || '—' })]));
+    }
+    function renderDrawer() {
+        const r = registrations[openRegId];
+        if (!r) { closeDrawer(); return; }
+        const st = statuses[openRegId] || {};
+        const scouts = asArray(r.scouts);
+        const h = r.health || {};
+        const healthPairs = [['Allergies', h.allergies], ['Dietary', h.dietary], ['Medications', h.medications], ['Conditions', h.conditions]].filter(([, v]) => v);
+
+        const notes = el('textarea', { id: 'notesInput', rows: '3', placeholder: 'Leader notes (only visible here)' });
+        notes.value = st.notes || '';
+        const confirmSlot = el('div');
+
+        $('drawer').replaceChildren(
+            el('div', { class: 'drawer-head' },
+                el('div', {},
+                    el('h2', { id: 'drawerTitle', text: r.parent?.name || 'Registration' }),
+                    el('div', { class: 'muted', text: `Ref ${openRegId.slice(-6).toUpperCase()} · ${fmtDate(r.submittedAt)}` })
+                ),
+                el('button', { type: 'button', class: 'close', 'aria-label': 'Close', onclick: closeDrawer }, '×')
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: `Scouts (${scouts.length})` }),
+                dlRows(scouts.map(s => [`${s.firstName} ${s.lastName}`, `Grade ${s.grade}`]))
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Parent / guardian' }),
+                dlRows([['Phone', r.parent?.phone], ['Email', r.parent?.email]])
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Emergency contact' }),
+                dlRows([['Name', r.emergency?.name], ['Relationship', r.emergency?.relationship], ['Phone', r.emergency?.phone]])
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Health and diet' }),
+                healthPairs.length ? el('div', { class: 'health-note' }, dlRows(healthPairs)) : el('div', { class: 'muted', text: 'No health or diet notes.' })
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Payment' }),
+                dlRows([['Amount', `$${r.amountDue}`], ['Method', payLabel(r.paymentMethod)], ['Status', st.paid ? 'Paid' : 'Unpaid']]),
+                el('div', { class: 'actions-row' },
+                    el('button', { type: 'button', class: st.paid ? 'secondary' : 'primary', onclick: () => setPaid(openRegId, !st.paid) }, st.paid ? 'Mark as unpaid' : 'Mark as paid')
+                )
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Permissions' }),
+                dlRows([
+                    ['Participation', r.consents?.participation ? 'Yes' : 'No'],
+                    ['Medical', r.consents?.medical ? 'Yes' : 'No'],
+                    ['Drop-off times', r.consents?.dropoffPickup ? 'Confirmed' : 'No'],
+                    ['Photos', r.consents?.photos ? 'May share' : 'Do not share'],
+                    ['Signed', r.signature]
+                ])
+            ),
+            el('div', { class: 'section' },
+                el('h3', {}, el('label', { for: 'notesInput', text: 'Leader notes' })),
+                notes,
+                el('div', { class: 'actions-row' },
+                    el('button', { type: 'button', class: 'secondary', onclick: () => saveNotes(openRegId, notes.value) }, 'Save notes')
+                )
+            ),
+            el('div', { class: 'section' },
+                el('h3', { text: 'Remove' }),
+                confirmSlot
+            )
+        );
+
+        const showDeleteButton = () => confirmSlot.replaceChildren(
+            el('button', { type: 'button', class: 'danger', onclick: showConfirm }, 'Delete registration')
+        );
+        const showConfirm = () => confirmSlot.replaceChildren(
+            el('div', { class: 'confirm-box' },
+                el('span', { text: `Delete this registration for ${scouts.map(s => s.firstName).join(', ')}? This can't be undone.` }),
+                el('div', { class: 'actions-row' },
+                    el('button', { type: 'button', class: 'danger solid', onclick: () => deleteRegistration(openRegId) }, 'Delete'),
+                    el('button', { type: 'button', class: 'secondary', onclick: showDeleteButton }, 'Cancel')
+                )
+            )
+        );
+        showDeleteButton();
+    }
+
+    // ---------- writes ----------
+    async function guarded(fn, okMsg) {
+        try { await fn(); if (okMsg) toast(okMsg); }
+        catch (err) { console.error(err); toast('Could not save. Check your connection and that your account has admin access.'); }
+    }
+    const setPaid = (id, paid) => guarded(() => statusRef.child(`${id}/paid`).set(paid), paid ? 'Marked as paid' : 'Marked as unpaid');
+    const setScoutFlag = (id, idx, key, on) => guarded(() => statusRef.child(`${id}/scouts/${idx}/${key}`).set(on));
+    const saveNotes = (id, text) => guarded(() => statusRef.child(`${id}/notes`).set(text.trim()), 'Notes saved');
+    async function deleteRegistration(id) {
+        await guarded(async () => {
+            await regRef.child(id).remove();
+            await statusRef.child(id).remove();
+        }, 'Registration deleted');
+        closeDrawer();
+    }
+
+    // ---------- CSV ----------
+    function exportCsv() {
+        const head = ['Scout first name', 'Scout last name', 'Grade', 'Parent', 'Parent phone', 'Parent email',
+            'Emergency contact', 'Relationship', 'Emergency phone', 'Allergies', 'Dietary', 'Medications', 'Conditions',
+            'Payment method', 'Family amount', 'Paid', 'Photo consent', 'Checked in', 'Picked up', 'Signature', 'Registered', 'Reference', 'Leader notes'];
+        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const lines = scoutRows().map(x => {
+            const h = x.r.health || {};
+            return [x.s.firstName, x.s.lastName, x.s.grade, x.r.parent?.name, x.r.parent?.phone, x.r.parent?.email,
+                x.r.emergency?.name, x.r.emergency?.relationship, x.r.emergency?.phone, h.allergies, h.dietary, h.medications, h.conditions,
+                payLabel(x.r.paymentMethod), x.r.amountDue, x.paid ? 'Yes' : 'No', x.r.consents?.photos ? 'Yes' : 'No',
+                x.checkedIn ? 'Yes' : 'No', x.pickedUp ? 'Yes' : 'No', x.r.signature,
+                x.r.submittedAt ? new Date(x.r.submittedAt).toISOString() : '', x.id.slice(-6).toUpperCase(), (statuses[x.id] || {}).notes
+            ].map(esc).join(',');
+        });
+        const blob = new Blob(['﻿' + [head.map(esc).join(','), ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = el('a', { href: URL.createObjectURL(blob), download: `camp-registrations-${CAMP_ID}.csv` });
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ---------- wiring ----------
+    $('filters').addEventListener('click', e => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        filter = chip.dataset.f;
+        $('filters').querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+        render();
+    });
+    $('search').addEventListener('input', render);
+    $('exportBtn').addEventListener('click', exportCsv);
+    $('scrim').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && openRegId) closeDrawer(); });
+    $('openToggle').addEventListener('change', e => {
+        const open = e.target.checked;
+        guarded(() => openRef.set(open), open ? 'Registration is open' : 'Registration is closed');
+    });
+    $('copyLink').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(regLink); toast('Link copied'); }
+        catch { getSelection().selectAllChildren($('shareLink')); toast('Press Ctrl+C to copy'); }
+    });
+
+    $('loginForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const errBox = $('loginError');
+        errBox.hidden = true;
+        $('loginBtn').disabled = true;
+        try {
+            await auth.signInWithEmailAndPassword($('loginEmail').value.trim(), $('loginPassword').value);
+        } catch (err) {
+            errBox.textContent = ['auth/wrong-password', 'auth/user-not-found', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(err.code)
+                ? 'Email or password is incorrect.'
+                : err.code === 'auth/too-many-requests' ? 'Too many attempts. Wait a few minutes and try again.' : 'Sign-in failed. Check your connection and try again.';
+            errBox.hidden = false;
+        } finally {
+            $('loginBtn').disabled = false;
+        }
+    });
+    $('logoutBtn').addEventListener('click', () => auth.signOut());
+
+    function detach() {
+        listeners.forEach(off => off());
+        listeners = [];
+        registrations = {};
+        statuses = {};
+    }
+    function listen(ref, cb) {
+        const handler = ref.on('value', cb, err => {
+            console.error(err);
+            if (err.code === 'PERMISSION_DENIED') {
+                auth.signOut();
+                $('loginError').textContent = 'This account does not have access to camp registrations.';
+                $('loginError').hidden = false;
+            }
+        });
+        listeners.push(() => ref.off('value', handler));
+    }
+
+    auth.onAuthStateChanged(user => {
+        detach();
+        $('loginView').hidden = Boolean(user);
+        $('appView').hidden = !user;
+        $('userBar').hidden = !user;
+        if (!user) { closeDrawer(); return; }
+        $('userEmail').textContent = user.email;
+        render();
+        listen(regRef, snap => { registrations = snap.val() || {}; render(); });
+        listen(statusRef, snap => { statuses = snap.val() || {}; render(); });
+        listen(openRef, snap => { $('openToggle').checked = snap.val() !== false; });
+    });
+</script>
+</body>
+</html>
