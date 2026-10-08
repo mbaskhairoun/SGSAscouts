@@ -127,6 +127,27 @@
         .toggle.on { background: var(--ok-bg); color: var(--ok); border-color: transparent; font-weight: 600; }
         .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
 
+        /* Phone: each row becomes a card */
+        @media (max-width: 720px) {
+            .table-wrap { background: transparent; border: 0; overflow: visible; }
+            table { min-width: 0; }
+            thead { display: none; }
+            tbody, tr, td { display: block; }
+            tbody { display: grid; gap: 10px; }
+            tr { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 0; }
+            td { border-bottom: 0; padding: 7px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+            td::before { content: attr(data-label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex: none; }
+            td[data-label="Scout"] { padding-top: 10px; }
+            td[data-label="Scout"]::before { display: none; }
+            td[data-label="Scout"] .name { font-size: 16px; }
+            td[data-label="Payment"] > div, td[data-label="Parent"] > div { text-align: right; }
+            .toggle { padding: 8px 12px; font-size: 13px; }
+            .toolbar-left input[type="search"] { max-width: none; }
+            .toolbar-right { width: 100%; }
+            .toolbar-right .switch, .toolbar-right .secondary { flex: 1; justify-content: center; text-align: center; padding: 10px 12px; }
+            .empty { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+        }
+
         /* Drawer */
         .scrim { position: fixed; inset: 0; background: rgba(5,12,25,.45); }
         .drawer {
@@ -364,22 +385,22 @@
                 ? el('span', { class: 'pill alert', text: 'Allergy' })
                 : health ? el('span', { class: 'pill warn', text: 'Notes' }) : el('span', { class: 'pill none', text: 'None' });
             const tr = el('tr', { onclick: () => openDrawer(x.id) },
-                el('td', {}, el('div', { class: 'name', text: `${x.s.firstName} ${x.s.lastName}` })),
-                el('td', { class: 'num', text: x.s.grade || '—' }),
-                el('td', {}, el('div', { text: x.r.parent?.name || '—' }), el('div', { class: 'muted', text: x.r.parent?.phone || '' })),
-                el('td', {}, healthPill),
-                el('td', {},
+                el('td', { 'data-label': 'Scout' }, el('div', { class: 'name', text: `${x.s.firstName} ${x.s.lastName}` })),
+                el('td', { 'data-label': 'Grade',  class: 'num', text: x.s.grade || '—' }),
+                el('td', { 'data-label': 'Parent' }, el('div', { text: x.r.parent?.name || '—' }), el('div', { class: 'muted', text: x.r.parent?.phone || '' })),
+                el('td', { 'data-label': 'Health' }, healthPill),
+                el('td', { 'data-label': 'Payment' },
                     el('button', { type: 'button', class: 'toggle' + (x.paid ? ' on' : ''), title: payLabel(x.r.paymentMethod),
                         onclick: e => { e.stopPropagation(); setPaid(x.id, !x.paid); } },
                         x.paid ? `Paid $${x.r.amountDue}` : `Unpaid $${x.r.amountDue}`),
                     el('div', { class: 'muted', text: payLabel(x.r.paymentMethod) })
                 ),
-                el('td', {}, el('span', { class: 'pill ' + (x.r.consents?.photos ? 'ok' : 'alert'), text: x.r.consents?.photos ? 'OK' : 'No photos' })),
-                el('td', {}, el('button', { type: 'button', class: 'toggle' + (x.checkedIn ? ' on' : ''),
+                el('td', { 'data-label': 'Photos' }, el('span', { class: 'pill ' + (x.r.consents?.photos ? 'ok' : 'alert'), text: x.r.consents?.photos ? 'OK' : 'No photos' })),
+                el('td', { 'data-label': 'Checked in' }, el('button', { type: 'button', class: 'toggle' + (x.checkedIn ? ' on' : ''),
                     onclick: e => { e.stopPropagation(); setScoutFlag(x.id, x.idx, 'checkedIn', !x.checkedIn); } }, x.checkedIn ? 'Checked in' : 'Check in')),
-                el('td', {}, el('button', { type: 'button', class: 'toggle' + (x.pickedUp ? ' on' : ''),
+                el('td', { 'data-label': 'Picked up' }, el('button', { type: 'button', class: 'toggle' + (x.pickedUp ? ' on' : ''),
                     onclick: e => { e.stopPropagation(); setScoutFlag(x.id, x.idx, 'pickedUp', !x.pickedUp); } }, x.pickedUp ? 'Picked up' : 'Mark picked up')),
-                el('td', { class: 'muted', text: fmtDate(x.r.submittedAt) })
+                el('td', { 'data-label': 'Registered',  class: 'muted', text: fmtDate(x.r.submittedAt) })
             );
             return tr;
         }));
