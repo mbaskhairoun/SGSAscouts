@@ -248,7 +248,6 @@
                         <th>Parent</th>
                         <th>Health</th>
                         <th>Payment</th>
-                        <th>Photos</th>
                         <th>Checked in</th>
                         <th>Picked up</th>
                         <th>Registered</th>
@@ -395,7 +394,6 @@
                         x.paid ? `Paid $${x.r.amountDue}` : `Unpaid $${x.r.amountDue}`),
                     el('div', { class: 'muted', text: payLabel(x.r.paymentMethod) })
                 ),
-                el('td', { 'data-label': 'Photos' }, el('span', { class: 'pill ' + (x.r.consents?.photos ? 'ok' : 'alert'), text: x.r.consents?.photos ? 'OK' : 'No photos' })),
                 el('td', { 'data-label': 'Checked in' }, el('button', { type: 'button', class: 'toggle' + (x.checkedIn ? ' on' : ''),
                     onclick: e => { e.stopPropagation(); setScoutFlag(x.id, x.idx, 'checkedIn', !x.checkedIn); } }, x.checkedIn ? 'Checked in' : 'Check in')),
                 el('td', { 'data-label': 'Picked up' }, el('button', { type: 'button', class: 'toggle' + (x.pickedUp ? ' on' : ''),
@@ -480,7 +478,6 @@
                     ['Medical', r.consents?.medical ? 'Yes' : 'No'],
                     ['Drop-off times', r.consents?.dropoffPickup ? 'Confirmed' : 'No'],
                     ['Payment terms', r.consents?.paymentRequired ? 'Acknowledged' : 'No'],
-                    ['Photos', r.consents?.photos ? 'May share' : 'Do not share'],
                     ['Signed', r.signature]
                 ])
             ),
@@ -532,13 +529,13 @@
     function exportCsv() {
         const head = ['Scout first name', 'Scout last name', 'Grade', 'Parent', 'Parent phone', 'Parent email',
             'Emergency contact', 'Relationship', 'Emergency phone', 'Allergies', 'Dietary', 'Medications', 'Conditions',
-            'Payment method', 'Family amount', 'Paid', 'Photo consent', 'Checked in', 'Picked up', 'Signature', 'Registered', 'Reference', 'Leader notes'];
+            'Payment method', 'Family amount', 'Paid', 'Checked in', 'Picked up', 'Signature', 'Registered', 'Reference', 'Leader notes'];
         const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
         const lines = scoutRows().map(x => {
             const h = x.r.health || {};
             return [x.s.firstName, x.s.lastName, x.s.grade, x.r.parent?.name, x.r.parent?.phone, x.r.parent?.email,
                 x.r.emergency?.name, x.r.emergency?.relationship, x.r.emergency?.phone, h.allergies, h.dietary, h.medications, h.conditions,
-                payLabel(x.r.paymentMethod), x.r.amountDue, x.paid ? 'Yes' : 'No', x.r.consents?.photos ? 'Yes' : 'No',
+                payLabel(x.r.paymentMethod), x.r.amountDue, x.paid ? 'Yes' : 'No',
                 x.checkedIn ? 'Yes' : 'No', x.pickedUp ? 'Yes' : 'No', x.r.signature,
                 x.r.submittedAt ? new Date(x.r.submittedAt).toISOString() : '', x.id.slice(-6).toUpperCase(), (statuses[x.id] || {}).notes
             ].map(esc).join(',');

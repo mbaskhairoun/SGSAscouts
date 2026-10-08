@@ -433,13 +433,6 @@
                 </label>
             </div>
             <div class="field">
-                <span class="label">Photos <span class="req">*</span></span>
-                <div class="radios" id="photoGroup">
-                    <label><input type="radio" name="photos" value="yes"> Photos of my child may be shared by SGSA Scouts</label>
-                    <label><input type="radio" name="photos" value="no"> Please do not share photos of my child</label>
-                </div>
-            </div>
-            <div class="field">
                 <label for="signature">Type your full name as your signature <span class="req">*</span></label>
                 <input type="text" id="signature" required maxlength="100">
             </div>
@@ -566,7 +559,6 @@
             }
         });
         if (!radio('payment')) { $('paymentGroup').classList.add('invalid'); problems.push('Choose a payment method.'); }
-        if (!radio('photos')) { $('photoGroup').classList.add('invalid'); problems.push('Choose a photo preference.'); }
         if (!$('cPayment').checked) problems.push('Confirm that registration is not complete until payment is received.');
         if (!$('cParticipate').checked || !$('cMedical').checked || !$('cTimes').checked) {
             problems.push('Check all three permission boxes.');
@@ -614,8 +606,7 @@
                 participation: true,
                 medical: true,
                 dropoffPickup: true,
-                paymentRequired: true,
-                photos: radio('photos') === 'yes'
+                paymentRequired: true
             },
             signature: val('signature'),
             submittedAt: firebase.database.ServerValue.TIMESTAMP
