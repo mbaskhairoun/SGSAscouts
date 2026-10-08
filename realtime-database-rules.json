@@ -1,7 +1,7 @@
 {
   "rules": {
-    ".read": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
-    ".write": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
+    ".read": "auth != null && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
+    ".write": "auth != null && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
     "announcements": {
       ".read": true,
       ".indexOn": [
@@ -60,7 +60,7 @@ INSTRUCTIONS FOR APPLYING THESE RULES:
 WHAT THESE RULES DO:
 
 ✅ Security:
-- Only authenticated users with verified emails can access data
+- Only signed-in admin accounts can access data
 - Only specific admin emails can read/write data
 - All data operations require authentication
 

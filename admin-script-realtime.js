@@ -327,18 +327,7 @@ function initializeApp() {
                 hideLoadingSpinner();
                 
                 // Check specific error types
-                if (error.code === 'PERMISSION_DENIED' && !user.emailVerified) {
-                    // Admin rules require a verified email. Send the link, then ask them to sign in again.
-                    try {
-                        await user.sendEmailVerification({ url: window.location.href });
-                        showNotification('Please verify your email first. A verification link was sent to ' + user.email + ' (check spam). Click it, then sign in again.', 'error');
-                    } catch (sendErr) {
-                        console.error('Could not send verification email:', sendErr);
-                        showNotification('Please verify your email first. We could not send a new link right now; check ' + user.email + ' (including spam) for an earlier one, then sign in again.', 'error');
-                    }
-                    await auth.signOut();
-                    showLoginModal();
-                } else if (error.code === 'PERMISSION_DENIED') {
+                if (error.code === 'PERMISSION_DENIED') {
                     await auth.signOut();
                     showLoginModal();
                     showNotification('Access denied. Your email (' + user.email + ') is not authorized for admin access.', 'error');
