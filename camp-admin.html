@@ -213,6 +213,24 @@
         </form>
     </section>
 
+    <section class="login" id="verifyView" hidden>
+        <div class="login-card">
+            <h2>Verify your email</h2>
+            <p style="margin:0">For security, admin accounts must have a verified email before they can see registrations. <strong id="verifyEmail"></strong> hasn't been verified yet.</p>
+            <ol style="margin:0; padding-left:20px; display:grid; gap:4px">
+                <li>Click <strong>Send verification email</strong>.</li>
+                <li>Open the email from Firebase / SGSA Kids and click its link. Check your spam folder if it doesn't arrive in a minute.</li>
+                <li>Come back here and click <strong>I've verified, continue</strong>.</li>
+            </ol>
+            <div class="error" id="verifyError" hidden></div>
+            <div class="actions-row">
+                <button type="button" class="primary" id="sendVerifyBtn">Send verification email</button>
+                <button type="button" class="secondary" id="recheckBtn">I've verified, continue</button>
+                <button type="button" class="secondary" id="verifyLogoutBtn">Sign out</button>
+            </div>
+        </div>
+    </section>
+
     <main id="appView" hidden>
         <div class="share">
             Registration link for parents:
@@ -605,17 +623,61 @@
         listeners.push(() => ref.off('value', handler));
     }
 
-    auth.onAuthStateChanged(user => {
-        detach();
-        $('loginView').hidden = Boolean(user);
-        $('appView').hidden = !user;
-        $('userBar').hidden = !user;
-        if (!user) { closeDrawer(); return; }
+    function showView(name) {
+        $('loginView').hidden = name !== 'login';
+        $('verifyView').hidden = name !== 'verify';
+        $('appView').hidden = name !== 'app';
+        $('userBar').hidden = name !== 'app';
+    }
+
+    function startApp(user) {
+        showView('app');
         $('userEmail').textContent = user.email;
         render();
         listen(regRef, snap => { registrations = snap.val() || {}; render(); });
         listen(statusRef, snap => { statuses = snap.val() || {}; render(); });
         listen(openRef, snap => { $('openToggle').checked = snap.val() !== false; });
+    }
+
+    $('sendVerifyBtn').addEventListener('click', async () => {
+        const errBox = $('verifyError');
+        errBox.hidden = true;
+        try {
+            await auth.currentUser.sendEmailVerification({ url: location.href });
+            toast('Verification email sent to ' + auth.currentUser.email);
+        } catch (err) {
+            console.error(err);
+            errBox.textContent = err.code === 'auth/too-many-requests'
+                ? 'A verification email was sent recently. Check your inbox and spam folder, then try again in a few minutes.'
+                : 'Could not send the email. Try again in a moment.';
+            errBox.hidden = false;
+        }
+    });
+    $('recheckBtn').addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        await user.reload();
+        if (!user.emailVerified) {
+            $('verifyError').textContent = 'Still not verified. Open the link in the verification email first.';
+            $('verifyError').hidden = false;
+            return;
+        }
+        await user.getIdToken(true);   // refresh the token so the database sees email_verified
+        detach();
+        startApp(user);
+    });
+    $('verifyLogoutBtn').addEventListener('click', () => auth.signOut());
+
+    auth.onAuthStateChanged(user => {
+        detach();
+        closeDrawer();
+        if (!user) { showView('login'); return; }
+        if (!user.emailVerified) {
+            $('verifyEmail').textContent = user.email;
+            showView('verify');
+            return;
+        }
+        startApp(user);
     });
 </script>
 </body>
