@@ -1,0 +1,49 @@
+{
+  "rules": {
+    ".read": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
+    ".write": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
+
+    "announcements": {
+      ".read": true,
+      ".indexOn": ["timestamp"]
+    },
+
+    "gallery": {
+      ".read": true,
+      "photos": {
+        ".indexOn": ["uploadDate", "category"]
+      }
+    },
+
+    "calendar": {
+      "events": {
+        ".read": true
+      },
+      "rsvps": {
+        ".read": true,
+        "$rsvpId": {
+          ".write": "!data.exists() && newData.exists()"
+        }
+      }
+    },
+
+    "subscribers": {
+      "$subscriberId": {
+        ".write": "!data.exists() && newData.exists()"
+      }
+    },
+
+    "campSettings": {
+      ".read": true
+    },
+
+    "campRegistrations": {
+      "$campId": {
+        "$regId": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['scouts', 'parent', 'emergency', 'consents', 'paymentMethod', 'signature', 'submittedAt', 'scoutCount', 'amountDue']) && newData.child('scoutCount').isNumber() && newData.child('scoutCount').val() >= 1 && newData.child('scoutCount').val() <= 10 && newData.child('amountDue').val() == newData.child('scoutCount').val() * 60 && newData.child('consents/participation').val() == true && newData.child('consents/medical').val() == true && newData.child('signature').isString() && newData.child('signature').val().length <= 100 && (newData.child('paymentMethod').val() == 'etransfer' || newData.child('paymentMethod').val() == 'cash')"
+        }
+      }
+    }
+  }
+}

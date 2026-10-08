@@ -1,52 +1,22 @@
 {
   "rules": {
-    ".read": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com')",
-    ".write": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com')",
-    
-    "scouts": {
-      "$scoutId": {
-        ".validate": "newData.hasChildren(['firstName', 'lastName', 'grade', 'parentName', 'parentPhone']) && newData.child('firstName').isString() && newData.child('lastName').isString() && newData.child('grade').isNumber() && newData.child('parentName').isString() && newData.child('parentPhone').isString()"
-      }
-    },
-    
-    "attendance": {
-      "$team": {
-        "$date": {
-          "$scoutId": {
-            ".validate": "newData.hasChildren(['status', 'timestamp', 'recordedBy']) && (newData.child('status').val() == 'present' || newData.child('status').val() == 'absent' || newData.child('status').val() == 'excused') && newData.child('timestamp').isString() && newData.child('recordedBy').isString()"
-          }
-        }
-      }
-    },
-    
-    "curriculum": {
-      "$team": {
-        "$year": {
-          "$week": {
-            ".validate": "newData.hasChildren(['weekNumber', 'theme']) && newData.child('weekNumber').isNumber() && newData.child('theme').isString()"
-          }
-        }
-      }
-    },
-
+    ".read": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
+    ".write": "auth != null && auth.token.email_verified == true && (auth.token.email == 'mbaskhairoun@gmail.com' || auth.token.email == 'admin@sgsascouts.com' || auth.token.email == 'leader@sgsascouts.com' || auth.token.email == 'coordinator@sgsascouts.com' || auth.token.email == 'tamerthomas5@gmail.com')",
     "announcements": {
       ".read": true,
-      ".indexOn": ["timestamp"],
-      "$announcementId": {
-        ".validate": "newData.hasChildren(['title', 'content', 'priority', 'active', 'timestamp']) && newData.child('title').isString() && newData.child('content').isString() && (newData.child('priority').val() == 'low' || newData.child('priority').val() == 'medium' || newData.child('priority').val() == 'high') && newData.child('active').isBoolean() && newData.child('timestamp').isNumber()"
-      }
+      ".indexOn": [
+        "timestamp"
+      ]
     },
-
     "gallery": {
       ".read": true,
       "photos": {
-        ".indexOn": ["uploadDate", "category"],
-        "$photoId": {
-          ".validate": "newData.hasChildren(['title', 'githubUrl', 'category', 'uploadDate', 'active']) && newData.child('title').isString() && newData.child('githubUrl').isString() && (newData.child('category').val() == 'cubs' || newData.child('category').val() == 'scouts' || newData.child('category').val() == 'rovers' || newData.child('category').val() == 'events' || newData.child('category').val() == 'activities') && newData.child('uploadDate').isNumber() && newData.child('active').isBoolean()"
-        }
+        ".indexOn": [
+          "uploadDate",
+          "category"
+        ]
       }
     },
-
     "calendar": {
       "events": {
         ".read": true
@@ -58,13 +28,14 @@
         }
       }
     },
-
     "subscribers": {
       "$subscriberId": {
         ".write": "!data.exists() && newData.exists()"
       }
     },
-
+    "campSettings": {
+      ".read": true
+    },
     "campRegistrations": {
       "$campId": {
         "$regId": {
@@ -72,14 +43,6 @@
           ".validate": "newData.hasChildren(['scouts', 'parent', 'emergency', 'consents', 'paymentMethod', 'signature', 'submittedAt', 'scoutCount', 'amountDue']) && newData.child('scoutCount').isNumber() && newData.child('scoutCount').val() >= 1 && newData.child('scoutCount').val() <= 10 && newData.child('amountDue').val() == newData.child('scoutCount').val() * 60 && newData.child('consents/participation').val() == true && newData.child('consents/medical').val() == true && newData.child('signature').isString() && newData.child('signature').val().length <= 100 && (newData.child('paymentMethod').val() == 'etransfer' || newData.child('paymentMethod').val() == 'cash')"
         }
       }
-    },
-
-    "campSettings": {
-      ".read": true
-    },
-
-    "settings": {
-      ".validate": "auth != null && auth.token.email_verified == true"
     }
   }
 }
@@ -109,8 +72,9 @@ WHAT THESE RULES DO:
 ✅ Admin Emails Allowed:
 - mbaskhairoun@gmail.com (your email)
 - admin@sgsascouts.com
-- leader@sgsascouts.com  
+- leader@sgsascouts.com
 - coordinator@sgsascouts.com
+- tamerthomas5@gmail.com
 
 TO ADD MORE ADMINS:
 Add their email to the list in both ".read" and ".write" rules:
