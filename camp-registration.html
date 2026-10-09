@@ -407,10 +407,6 @@
                 <span id="totalLabel">1 Scout × $60</span>
                 <strong id="totalAmount">$60</strong>
             </div>
-            <label class="check">
-                <input type="checkbox" id="cPayment">
-                <span>I understand that <strong>registration is not complete until payment is received</strong>. <span class="req">*</span></span>
-            </label>
         </section>
 
         <section class="step">
@@ -559,7 +555,6 @@
             }
         });
         if (!radio('payment')) { $('paymentGroup').classList.add('invalid'); problems.push('Choose a payment method.'); }
-        if (!$('cPayment').checked) problems.push('Confirm that registration is not complete until payment is received.');
         if (!$('cParticipate').checked || !$('cMedical').checked || !$('cTimes').checked) {
             problems.push('Check all three permission boxes.');
         }
@@ -605,8 +600,7 @@
             consents: {
                 participation: true,
                 medical: true,
-                dropoffPickup: true,
-                paymentRequired: true
+                dropoffPickup: true
             },
             signature: val('signature'),
             submittedAt: firebase.database.ServerValue.TIMESTAMP
@@ -642,9 +636,6 @@
             ? `Amount due: $${record.amountDue} in cash at drop-off`
             : `Amount due: $${record.amountDue} by Interac e-Transfer to Raymonda.farid@gmail.com`;
         list.appendChild(pay);
-        const note = document.createElement('li');
-        note.textContent = 'Your registration is not complete until payment is received.';
-        list.appendChild(note);
         form.hidden = true;
         $('successState').hidden = false;
         window.scrollTo({ top: 0, behavior: 'smooth' });
